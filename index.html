@@ -391,9 +391,10 @@
             <textarea id="nlGreeting" class="mid" style="min-height:56px"></textarea>
             <label>結尾署名（接在內文後）</label>
             <input type="text" id="nlSignature">
-            <label>PS 好消息報報（免費試看＋訂閱者折扣碼；折扣碼換了記得改）</label>
-            <textarea id="nlPs" class="mid" style="min-height:90px"></textarea>
             <button class="ghost" id="btnResetNl">↩︎ 公版還原預設</button>
+            <div class="note-inline">
+              📢 「好消息報報」不在這裡組裝——它是 Systeme 信件裡的獨立區塊（試看連結＋折扣碼），每週直接沿用後台那一塊。
+            </div>
           </details>
         </div>
       </div>
@@ -414,7 +415,8 @@
             <li>原文一字不改：只修錯字，語氣用詞全保留</li>
             <li>段落規則：句號後才換行、一個完整意思一段</li>
             <li>強調句已拍板、寧少勿多（選洞察鏈，不選金句宣言）</li>
-            <li>PS 好消息報報＝實際內容（不是占位提示；折扣碼效期沒過）</li>
+            <li>Systeme「好消息報報」獨立區塊：試看連結沒斷、折扣碼效期沒過</li>
+            <li>⚠️ 排程信的「內文」已換成本週文章（複製上期改主旨最容易漏這步）</li>
             <li>docx 交付版＝煙玉暖根 V2（強調句拍板後跟 Claude 說一聲產檔）</li>
             <li>🚨 先發「管理員測試信」，收到確認沒問題才正式發送</li>
           </ul>
@@ -497,10 +499,10 @@
       '  › 合作洽詢 (Email)：lion.mcn2311@gmail.com',
       '  › LINE 即時客服：https://line.me/R/ti/p/@572klveu'
     ].join('\n'),
-    // 電子報公版（2026-08-21 新增；開場與結尾取自 Notion 每週固定寫法）
+    // 電子報公版（2026-08-21 新增；開場與結尾取自 Notion 每週固定寫法。
+    // 好消息報報＝Systeme 信件內的獨立區塊，不在工作台組裝——Mandy 拍板）
     nlGreeting: '嗨～我是Jackal 這週好嗎？',
-    nlSignature: 'peace~',
-    nlPs: 'PS. 好消息報報\n（⚠️ 占位提示：把上一週的好消息段落貼進來——免費試看影片＋訂閱者專屬折扣碼——改一次永久記住）'
+    nlSignature: 'peace~'
   };
   const EPISODE_FIELDS = ['ytTitle', 'ytProse', 'ytChapters', 'ytEpTags', 'ytEpSearchTags', 'pcTitle', 'pcProse', 'pcEpTags', 'pinEpLine'];
   const NL_FIELDS = ['nlTitle', 'nlNotion', 'nlProse'];
@@ -578,8 +580,8 @@
       .split(/[,，]/).map(t => t.trim().replace(/^#/, '')).filter(Boolean).join(',');
   }
   function nlFull() {
-    // 電子報 Systeme 貼上版：開場問候 → 內文 → 結尾署名 → PS 好消息報報
-    return [$('nlGreeting').value.trim(), $('nlProse').value.trim(), $('nlSignature').value.trim(), $('nlPs').value.trim()]
+    // 電子報 Systeme 貼上版：開場問候 → 內文 → 結尾署名（好消息報報走 Systeme 獨立區塊）
+    return [$('nlGreeting').value.trim(), $('nlProse').value.trim(), $('nlSignature').value.trim()]
       .filter(Boolean).join('\n\n');
   }
 
@@ -691,8 +693,8 @@
     save(); render();
   });
   $('btnResetNl').addEventListener('click', () => {
-    if (!confirm('電子報公版還原預設？（會覆蓋你改過的開場／署名／PS）')) return;
-    ['nlGreeting', 'nlSignature', 'nlPs'].forEach(id => $(id).value = DEFAULTS[id]);
+    if (!confirm('電子報公版還原預設？（會覆蓋你改過的開場／署名）')) return;
+    ['nlGreeting', 'nlSignature'].forEach(id => $(id).value = DEFAULTS[id]);
     save(); render();
   });
 
