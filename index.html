@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>上架工作台｜每週上片小站</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: 'jf-openhuninn';
+    src: url('./jf-openhuninn.ttf') format('truetype');
+    font-display: swap;
+  }
+  :root {
+    --ivory: #F5F0EB;
+    --ivory-warm: #EDE6DE;
+    --text: #4A4440;
+    --text-light: #7A7470;
+    --rose: #C4A7A0;
+    --rose-dark: #A8867D;
+    --sage: #A8B5A2;
+    --sage-dark: #8A9B83;
+    --fog: #9DAEBB;
+    --brown: #9B7E72;
+    --sand: #C9BEAA;
+    --border: #D8CFC6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'jf-openhuninn', 'Yuanti TC', 'PingFang TC', sans-serif;
+    background: var(--ivory);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+  h1 { font-size: 26px; letter-spacing: 2px; }
+  h1 .en { font-family: 'Kalam', cursive; color: var(--rose-dark); font-size: 18px; margin-left: 6px; }
+  .save-hint { font-size: 12px; color: var(--text-light); margin-left: auto; transition: opacity .4s; }
+  .subtitle { font-size: 13px; color: var(--text-light); margin-bottom: 20px; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+  .tab {
+    border: 1px solid var(--border); background: #fff; color: var(--text-light);
+    padding: 9px 22px; border-radius: 20px 20px 0 0; cursor: pointer; font-size: 15px;
+    font-family: inherit; border-bottom: none;
+  }
+  .tab.active { background: var(--rose); color: #fff; border-color: var(--rose); }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: #fff; border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px; margin-bottom: 20px;
+  }
+  .card h2 {
+    font-size: 16px; margin-bottom: 14px; color: var(--brown);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card h2::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--rose); }
+
+  label { display: block; font-size: 13px; color: var(--text-light); margin: 14px 0 5px; }
+  label:first-of-type { margin-top: 0; }
+  label .cnt { float: right; font-family: 'Patrick Hand', cursive; }
+  label .cnt.over { color: #B0655A; font-weight: bold; }
+  input[type=text], textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--ivory); padding: 10px 12px; font-family: inherit;
+    font-size: 14px; color: var(--text); line-height: 1.7; resize: vertical;
+  }
+  input[type=text]:focus, textarea:focus { outline: 2px solid var(--rose); border-color: transparent; background: #fff; }
+  textarea.tall { min-height: 150px; }
+  textarea.mid { min-height: 90px; }
+
+  .row-check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 14px; }
+  .row-check input { accent-color: var(--rose-dark); width: 16px; height: 16px; }
+
+  details.pubban { border: 1px dashed var(--sand); border-radius: 12px; padding: 12px 16px; background: var(--ivory-warm); }
+  details.pubban summary { cursor: pointer; font-size: 14px; color: var(--brown); user-select: none; }
+  details.pubban[open] summary { margin-bottom: 4px; }
+
+  .preview-box {
+    background: var(--ivory); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; white-space: pre-wrap; word-break: break-word;
+    font-size: 14px; line-height: 1.8; min-height: 200px; max-height: 55vh; overflow-y: auto;
+  }
+  .preview-empty { color: var(--text-light); font-size: 13px; }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  button.copy {
+    font-family: inherit; font-size: 14px; cursor: pointer;
+    border: none; border-radius: 20px; padding: 10px 20px;
+    background: var(--ivory-warm); color: var(--text); border: 1px solid var(--border);
+    transition: transform .1s;
+  }
+  button.copy:active { transform: scale(.96); }
+  button.copy.primary { background: var(--brown); color: #fff; border-color: var(--brown); font-size: 15px; }
+  button.copy.done { background: var(--sage); color: #fff; border-color: var(--sage); }
+  button.ghost {
+    font-family: inherit; font-size: 12px; cursor: pointer; margin-top: 14px;
+    background: none; border: 1px solid var(--border); color: var(--text-light);
+    border-radius: 14px; padding: 6px 14px;
+  }
+  button.ghost:hover { color: var(--brown); border-color: var(--brown); }
+
+  .checklist { font-size: 13px; color: var(--text-light); line-height: 2; }
+  .checklist li { list-style: none; padding-left: 22px; position: relative; }
+  .checklist li::before { content: '✓'; position: absolute; left: 2px; color: var(--sage-dark); font-family: 'Kalam', cursive; }
+
+  .sticky { position: sticky; top: 20px; }
+  .hidden { display: none; }
+
+  /* 常用後台快捷 + 設定備份列 */
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+    margin-bottom: 18px; padding: 10px 14px;
+    background: var(--ivory-warm); border: 1px dashed var(--sand); border-radius: 12px;
+    font-size: 12.5px;
+  }
+  .toolbar .grp { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .toolbar .lbl { color: var(--text-light); }
+  .toolbar a {
+    color: var(--brown); text-decoration: none;
+    border-bottom: 1px solid var(--sand); padding-bottom: 1px;
+  }
+  .toolbar a:hover { color: var(--rose-dark); border-color: var(--rose-dark); }
+  .toolbar .sep { color: var(--sand); }
+  .toolbar .spacer { margin-left: auto; }
+  button.mini {
+    font-family: inherit; font-size: 12px; cursor: pointer;
+    background: #fff; border: 1px solid var(--border); color: var(--text-light);
+    border-radius: 12px; padding: 5px 12px;
+  }
+  button.mini:hover { color: var(--brown); border-color: var(--brown); }
+  button.mini.done { background: var(--sage); color: #fff; border-color: var(--sage); }
+
+  .note-inline {
+    font-size: 12px; color: var(--text-light); line-height: 1.7;
+    background: var(--ivory-warm); border-left: 3px solid var(--sand);
+    border-radius: 6px; padding: 8px 12px; margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>上架工作台<span class="en">Publish Bench</span></h1>
+    <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
+  </header>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。公版改一次，永久記住（存在這台電腦的瀏覽器裡）。</p>
+
+  <div class="toolbar">
+    <div class="grp">
+      <span class="lbl">常用後台</span>
+      <a href="https://studio.youtube.com" target="_blank" rel="noopener">YouTube Studio</a>
+      <span class="sep">·</span>
+      <a href="https://studio.firstory.me" target="_blank" rel="noopener">Firstory</a>
+      <span class="sep">·</span>
+      <a href="https://systeme.io/dashboard" target="_blank" rel="noopener">Systeme 電子報</a>
+    </div>
+    <div class="grp spacer">
+      <span class="lbl">公版備份</span>
+      <button class="mini" id="btnExport">⬇︎ 匯出設定</button>
+      <button class="mini" id="btnImport">⬆︎ 匯入設定</button>
+      <input type="file" id="fileImport" accept="application/json,.json" class="hidden">
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="yt">YouTube 簡介</button>
+    <button class="tab" data-tab="pc">Podcast 節目介紹</button>
+    <button class="tab" data-tab="pin">置頂留言</button>
+  </div>
+
+  <!-- ═══════════ YouTube ═══════════ -->
+  <div id="tab-yt">
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h2>當集內容</h2>
+          <label>影片標題 <span class="cnt" id="cntTitle">0 / 100</span></label>
+          <input type="text" id="ytTitle" placeholder="例：大事沒發生，關係卻變淡了？讓感情漸行漸遠的小事｜feat. 小歐">
+          <label>簡介 prose（跟 Claude 討論完的定稿貼這裡）</label>
+          <textarea id="ytProse" class="tall" placeholder="講到讓關係變淡的原因，我們很容易想到……"></textarea>
+          <label>章節時間軸（⚠️ 精剪定稿才貼；留空＝成品不會出現）</label>
+          <textarea id="ytChapters" class="mid" placeholder="00:00 精華搶先看&#10;01:55 小事一：……"></textarea>
+          <label>當集標籤（接在固定 5 個之後）</label>
+          <input type="text" id="ytEpTags" placeholder="#人生啊 #小歐 #情緒價值">
+          <label>後台搜尋 tags・當集追加（逗號分隔）</label>
+          <input type="text" id="ytEpSearchTags" placeholder="小歐, 人生啊, 情緒價值, 感情變淡">
+          <div class="row-check">
+            <input type="checkbox" id="ytSafety" checked>
+            <label for="ytSafety" style="margin:0; font-size:14px; color:var(--text);">這集加「⚠️ 安全提醒」（談關係失衡／可能涉及受暴情境時勾選）</label>
+          </div>
+          <button class="ghost" id="btnClearYt">🧹 清空本集內容（公版不動）</button>
+        </div>
+
+        <div class="card">
+          <h2>公版（改一次記住）</h2>
+          <details class="pubban" open>
+            <summary>展開編輯公版</summary>
+            <label>置頂課程 CTA（放最前面，未展開就看得到；早鳥期限到了記得改）</label>
+            <textarea id="ytTopCta" class="mid" style="min-height:64px"></textarea>
+            <label>固定 hashtag（順序不可動：品牌→本名→伴侶溝通 前三會顯示在標題上方；#伴侶關係必修課 常駐殿後）</label>
+            <textarea id="ytFixedTags" class="mid" style="min-height:56px"></textarea>
+            <label>置底 footer 公版（課程／電子報／收聽／追蹤／聯絡方式，接在最後）</label>
+            <textarea id="ytContact" class="tall"></textarea>
+            <label>⚠️ 安全提醒文字</label>
+            <textarea id="ytSafetyText" class="mid" style="min-height:64px"></textarea>
+            <label>後台搜尋 tags・固定公版</label>
+            <textarea id="ytSearchTagsBase" class="mid" style="min-height:56px"></textarea>
+            <button class="ghost" id="btnResetYt">↩︎ 公版還原預設</button>
+          </details>
+        </div>
+      </div>
+
+      <div class="sticky">
+        <div class="card">
+          <h2>成品預覽 <span style="margin-left:auto; font-size:12px; color:var(--text-light);" id="cntDesc">0 / 5000</span></h2>
+          <div class="preview-box" id="ytPreview"><span class="preview-empty">左邊貼上內容，這裡即時組裝……</span></div>
+          <div class="btns">
+            <button class="copy primary" data-copy="ytFull">📋 複製完整簡介</button>
+            <button class="copy" data-copy="ytTitle">複製標題</button>
+            <button class="copy" data-copy="ytSearch">複製後台 tags</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>上架前 30 秒檢查</h2>
+          <ul class="checklist">
+            <li>低劇透：簡介只給鉤子不給答案（冷開場出現過的問題句才可用）</li>
+            <li>引句出處：來賓「引用」的臺詞不能寫成來賓的結論</li>
+            <li>翻轉句型邏輯成立才用（大事之外還有小事 ≠ 剛好相反）</li>
+            <li>章節時間軸＝精剪定稿才貼</li>
+            <li>prose 裡不放 hashtag／emoji；標籤只在功能區</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ Podcast ═══════════ -->
+  <div id="tab-pc" class="hidden">
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h2>當集內容</h2>
+          <label>集數標題</label>
+          <input type="text" id="pcTitle" placeholder="EP83 讓關係漸行漸遠的小事 Feat. 小歐">
+          <label>節目介紹 prose</label>
+          <textarea id="pcProse" class="tall" placeholder="這一集我們聊……"></textarea>
+          <label>Firstory 標籤・當集追加（半形逗號、無空格、無 #；亂貼也會自動整理）</label>
+          <input type="text" id="pcEpTags" placeholder="小歐,人生啊,情緒價值">
+          <button class="ghost" id="btnClearPc">🧹 清空本集內容（公版不動）</button>
+        </div>
+        <div class="card">
+          <h2>公版（改一次記住）</h2>
+          <details class="pubban" open>
+            <summary>展開編輯公版</summary>
+            <label>置頂課程 CTA（早鳥期限到了記得改）</label>
+            <textarea id="pcTopCta" class="mid" style="min-height:64px"></textarea>
+            <label>置底 footer 公版（加入會員／留言／電子報／收聽／追蹤／聯絡方式）</label>
+            <textarea id="pcFooter" class="tall"></textarea>
+            <label>Firstory 標籤・固定公版（半形逗號、無空格、無 #）</label>
+            <textarea id="pcTagsBase" class="mid" style="min-height:56px"></textarea>
+            <button class="ghost" id="btnResetPc">↩︎ 公版還原預設</button>
+          </details>
+        </div>
+      </div>
+      <div class="sticky">
+        <div class="card">
+          <h2>成品預覽 <span style="margin-left:auto; font-size:12px; color:var(--text-light);" id="cntPc">0 字</span></h2>
+          <div class="preview-box" id="pcPreview"><span class="preview-empty">左邊貼上內容，這裡即時組裝……</span></div>
+          <div class="btns">
+            <button class="copy primary" data-copy="pcFull">📋 複製節目介紹</button>
+            <button class="copy" data-copy="pcTitle">複製標題</button>
+            <button class="copy" data-copy="pcTags">複製 Firstory 標籤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ 置頂留言 ═══════════ -->
+  <div id="tab-pin" class="hidden">
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h2>當集開場句（選填）</h2>
+          <label>放在兩個資源區塊之前；留空＝只輸出公版本體</label>
+          <textarea id="pinEpLine" class="mid" style="min-height:64px" placeholder="例：這集聊到的「小事」，如果你也想從根本梳理關係——"></textarea>
+          <button class="ghost" id="btnClearPin">🧹 清空開場句（公版不動）</button>
+          <div class="note-inline">
+            ⏰ <strong>首播影片請等首播結束再貼。</strong>首播前留言區是「首播聊天室」，置頂通常不穩定。
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>公版（改一次記住）</h2>
+          <details class="pubban" open>
+            <summary>展開編輯公版</summary>
+            <label>置頂留言公版（⭐ JK 審查最終發佈版）</label>
+            <textarea id="pinComment" class="tall" style="min-height:190px"></textarea>
+            <button class="ghost" id="btnResetPin">↩︎ 公版還原預設</button>
+          </details>
+          <div class="note-inline">
+            🔗 電子報連結已帶 <code>utm_medium=comment</code>，用來跟簡介來源分流統計。<strong>複製到簡介時不要用這版</strong>，簡介請走「YouTube 簡介」分頁的 footer 公版。
+          </div>
+        </div>
+      </div>
+
+      <div class="sticky">
+        <div class="card">
+          <h2>成品預覽 <span style="margin-left:auto; font-size:12px; color:var(--text-light);" id="cntPin">0 字</span></h2>
+          <div class="preview-box" id="pinPreview"><span class="preview-empty">公版已載入，這裡即時組裝……</span></div>
+          <div class="btns">
+            <button class="copy primary" data-copy="pinFull">📋 複製置頂留言</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>貼上前 20 秒檢查</h2>
+          <ul class="checklist">
+            <li>影片已「首播結束／正式公開」，不是倒數中</li>
+            <li>課名與連結是現行版本（課程若改名／搬家要先更新公版）</li>
+            <li>貼上後記得按「置頂」，編輯舊留言不會掉置頂狀態</li>
+            <li>早鳥／限時字樣過期了沒</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const KEY = 'publish-workbench-v1';
+
+  const DEFAULTS = {
+    ytTopCta: '▍伴侶關係必修課（早鳥至 9/30）\n👉 課程連結：https://lifediscoverybs.kaik.io/courses/79',
+    ytFixedTags: '#人生解扣方程式 #盧育明 #伴侶溝通 #親密關係 #人際關係 #伴侶關係必修課',
+    ytSafetyText: '⚠️ 本集談的是一般關係中的溝通與失衡。如果你的處境涉及暴力、威脅或控制，請把自身的安全放在第一位，優先尋求專業協助。',
+    ytSearchTagsBase: '人生解扣方程式, 盧育明, Jackal, 伴侶溝通, 親密關係, 人際關係, 感情經營',
+    ytContact: [
+      '──────────',
+      '',
+      '❯ 《讀懂讓關係卡住的事》',
+      '——從無效溝通到深度連結的伴侶關係必修課',
+      'https://lifediscoverybs.kaik.io/courses/79',
+      '',
+      '❯ 免費訂閱｜「Jackal的溝通思維筆記」電子報',
+      '  每週收到一個實用的溝通心法，直接寄到你信箱。',
+      'https://lion-mcn2311.systeme.io/32a2664d-ed3bd1be',
+      '──────────',
+      '',
+      '❯ 收聽 Podcast｜人生解扣方程式',
+      '  › Spotify：https://reurl.cc/46Yllv',
+      '  › Apple Podcast：https://reurl.cc/qnappE',
+      '',
+      '❯ 追蹤 Jackal｜即時互動與分享',
+      '  › Instagram：https://www.instagram.com/jackalchatnlp/',
+      '  › Threads：https://www.threads.com/@jackalchatnlp',
+      '  › YouTube：https://www.youtube.com/channel/UCjcmGWRVDJ3M4nfZYzjtUZw',
+      '  › Facebook：https://www.facebook.com/jackal.ganbate/',
+      '',
+      '❯ 聯絡方式',
+      '  › 投稿「解扣信箱」：lion2509@jackalchatnlp.com',
+      '  › 合作洽詢 (Email)：lion.mcn2311@gmail.com',
+      '  › LINE 即時客服：https://line.me/R/ti/p/@572klveu'
+    ].join('\n'),
+    pcTopCta: '▍伴侶關係必修課（早鳥至 9/30）\n👉 課程連結：https://lifediscoverybs.kaik.io/courses/79',
+    // ⭐ 置頂留言公版：JK 審查後最終發佈版（2026-07-24 由 Mandy 提供，逐字收錄）
+    pinComment: [
+      '❶ 完整課程｜《讀懂讓關係卡住的事》',
+      '　從無效溝通到深度連結的伴侶關係必修課，幫你從根本梳理、改善關係。',
+      '　https://lifediscoverybs.kaik.io/courses/79',
+      '',
+      '❷ 免費訂閱｜Jackal 的溝通思維筆記',
+      '　每週一則實用的溝通心法，直接寄到你信箱。',
+      '　https://lion-mcn2311.systeme.io/32a2664d-ed3bd1be?utm_source=YouTube&utm_medium=comment&utm_campaign=jackal-note'
+    ].join('\n'),
+    pcTagsBase: '人生解扣方程式,盧育明,伴侶溝通,親密關係,人際關係,伴侶關係必修課',
+    pcFooter: [
+      '加入會員，支持節目： https://cm5pemx0m006601y7adrc9zui.firstory.io/join',
+      '留言告訴我你對這一集的想法： https://open.firstory.me/user/cm5pemx0m006601y7adrc9zui/comments',
+      '',
+      '❯ 免費訂閱｜「Jackal的溝通思維筆記」電子報',
+      '  每週收到一個實用的溝通心法，直接寄到你信箱。',
+      'https://lion-mcn2311.systeme.io/32a2664d-ed3bd1be',
+      '',
+      '──────────',
+      '',
+      '❯ 收聽 Podcast｜人生解扣方程式',
+      '  › Spotify：https://reurl.cc/46Yllv',
+      '  › Apple Podcast：https://reurl.cc/qnappE',
+      '',
+      '❯ 追蹤 Jackal｜即時互動與分享',
+      '  › Instagram (圖文)：https://www.instagram.com/jackalchatnlp/',
+      '  › Threads (日常)：https://www.threads.com/@jackalchatnlp',
+      '  › YouTube (影片)：https://www.youtube.com/channel/UCjcmGWRVDJ3M4nfZYzjtUZw',
+      '  › Facebook 粉專：https://www.facebook.com/jackal.ganbate/',
+      '',
+      '❯ 聯絡方式',
+      '  › 投稿「解扣信箱」：lion2509@jackalchatnlp.com',
+      '  › 合作洽詢 (Email)：lion.mcn2311@gmail.com',
+      '  › LINE 即時客服：https://line.me/R/ti/p/@572klveu'
+    ].join('\n')
+  };
+  const EPISODE_FIELDS = ['ytTitle', 'ytProse', 'ytChapters', 'ytEpTags', 'ytEpSearchTags', 'pcTitle', 'pcProse', 'pcEpTags', 'pinEpLine'];
+  const PUBBAN_FIELDS = Object.keys(DEFAULTS);
+  const ALL_FIELDS = [...EPISODE_FIELDS, ...PUBBAN_FIELDS];
+
+  const $ = id => document.getElementById(id);
+
+  /* ── 載入 ── */
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { state = {}; }
+  ALL_FIELDS.forEach(id => {
+    $(id).value = (id in state) ? state[id] : (DEFAULTS[id] || '');
+  });
+  $('ytSafety').checked = ('ytSafety' in state) ? state.ytSafety : true;
+
+  // 2026-08-21 Mandy 拍板：「伴侶關係必修課」常駐固定標籤（YouTube hashtag ＋ Firstory 基底）——既有 localStorage 一次性補上
+  if ($('ytFixedTags').value.trim() && !$('ytFixedTags').value.includes('#伴侶關係必修課')) {
+    $('ytFixedTags').value = $('ytFixedTags').value.trim() + ' #伴侶關係必修課';
+    save();
+  }
+  if ($('pcTagsBase').value.trim() && !$('pcTagsBase').value.includes('伴侶關係必修課')) {
+    $('pcTagsBase').value = $('pcTagsBase').value.trim().replace(/,\s*$/, '') + ',伴侶關係必修課';
+    save();
+  }
+
+  /* ── 儲存（防抖）── */
+  let saveTimer = null;
+  function save() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const s = {};
+      ALL_FIELDS.forEach(id => s[id] = $(id).value);
+      s.ytSafety = $('ytSafety').checked;
+      localStorage.setItem(KEY, JSON.stringify(s));
+      const h = $('saveHint');
+      h.style.opacity = 1;
+      setTimeout(() => h.style.opacity = .35, 1200);
+    }, 300);
+  }
+
+  /* ── 組裝 ── */
+  function ytHashtags() {
+    return [$('ytFixedTags').value.trim(), $('ytEpTags').value.trim()].filter(Boolean).join(' ');
+  }
+  function ytFull() {
+    // 依頻道實際版型（EP81/EP82）：置頂 CTA → 章節（無標題行）→ prose → hashtag → ⚠️ → 置底 footer
+    const blocks = [
+      $('ytTopCta').value.trim(),
+      $('ytChapters').value.trim(),
+      $('ytProse').value.trim(),
+      ytHashtags(),
+      $('ytSafety').checked ? $('ytSafetyText').value.trim() : '',
+      $('ytContact').value.trim()
+    ];
+    return blocks.filter(Boolean).join('\n\n');
+  }
+  function ytSearch() {
+    return [$('ytSearchTagsBase').value.trim(), $('ytEpSearchTags').value.trim()]
+      .filter(Boolean).join(', ').replace(/,\s*,/g, ',');
+  }
+  function pcFull() {
+    // 依 Firstory 實際版型（EP82）：置頂 CTA → prose → footer（會員/留言/電子報/收聽/追蹤/聯絡）
+    return [$('pcTopCta').value.trim(), $('pcProse').value.trim(), $('pcFooter').value.trim()]
+      .filter(Boolean).join('\n\n');
+  }
+  function pinFull() {
+    // 置頂留言：當集開場句（選填）→ 公版本體
+    return [$('pinEpLine').value.trim(), $('pinComment').value.trim()]
+      .filter(Boolean).join('\n\n');
+  }
+  function pcTags() {
+    // Firstory 格式：半形逗號分隔、無空格、無井字號（2026-07-23 Mandy 指定）
+    return [$('pcTagsBase').value, $('pcEpTags').value].join(',')
+      .split(/[,，]/).map(t => t.trim().replace(/^#/, '')).filter(Boolean).join(',');
+  }
+
+  /* ── 預覽與字數 ── */
+  function render() {
+    const yt = ytFull();
+    $('ytPreview').innerHTML = '';
+    if (yt) { $('ytPreview').textContent = yt; }
+    else { $('ytPreview').innerHTML = '<span class="preview-empty">左邊貼上內容，這裡即時組裝……</span>'; }
+
+    const pc = pcFull();
+    $('pcPreview').innerHTML = '';
+    if (pc) { $('pcPreview').textContent = pc; }
+    else { $('pcPreview').innerHTML = '<span class="preview-empty">左邊貼上內容，這裡即時組裝……</span>'; }
+    $('cntPc').textContent = pc.length + ' 字';
+
+    const pin = pinFull();
+    $('pinPreview').innerHTML = '';
+    if (pin) { $('pinPreview').textContent = pin; }
+    else { $('pinPreview').innerHTML = '<span class="preview-empty">公版已載入，這裡即時組裝……</span>'; }
+    $('cntPin').textContent = pin.length + ' 字';
+
+    const tLen = $('ytTitle').value.length;
+    $('cntTitle').textContent = tLen + ' / 100';
+    $('cntTitle').classList.toggle('over', tLen > 100);
+    $('cntDesc').textContent = yt.length + ' / 5000';
+    $('cntDesc').style.color = yt.length > 5000 ? '#B0655A' : '';
+  }
+
+  ALL_FIELDS.forEach(id => $(id).addEventListener('input', () => { save(); render(); }));
+  $('ytSafety').addEventListener('change', () => { save(); render(); });
+
+  /* ── 複製 ── */
+  const COPY_SOURCES = {
+    ytFull, ytSearch, pcFull, pcTags, pinFull,
+    ytTitle: () => $('ytTitle').value.trim(),
+    pcTitle: () => $('pcTitle').value.trim()
+  };
+  function doCopy(text, btn) {
+    const finish = ok => {
+      const orig = btn.textContent;
+      btn.textContent = ok ? '已複製 ✓' : '複製失敗';
+      btn.classList.add('done');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => finish(true)).catch(() => fallbackCopy(text, finish));
+    } else { fallbackCopy(text, finish); }
+  }
+  function fallbackCopy(text, finish) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = 0;
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+    finish(ok);
+  }
+  document.querySelectorAll('button.copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = COPY_SOURCES[btn.dataset.copy]();
+      if (!text) { doCopy('', btn); return; }
+      doCopy(text, btn);
+    });
+  });
+
+  /* ── 清空／還原 ── */
+  $('btnClearYt').addEventListener('click', () => {
+    if (!confirm('清空 YouTube 當集內容？（公版不受影響）')) return;
+    ['ytTitle','ytProse','ytChapters','ytEpTags','ytEpSearchTags'].forEach(id => $(id).value = '');
+    save(); render();
+  });
+  $('btnClearPc').addEventListener('click', () => {
+    if (!confirm('清空 Podcast 當集內容？（公版不受影響）')) return;
+    ['pcTitle','pcProse','pcEpTags'].forEach(id => $(id).value = '');
+    save(); render();
+  });
+  $('btnResetYt').addEventListener('click', () => {
+    if (!confirm('YouTube 公版全部還原預設？（會覆蓋你改過的公版）')) return;
+    ['ytTopCta','ytFixedTags','ytContact','ytSafetyText','ytSearchTagsBase'].forEach(id => $(id).value = DEFAULTS[id]);
+    save(); render();
+  });
+  $('btnResetPc').addEventListener('click', () => {
+    if (!confirm('Podcast 公版全部還原預設？（會覆蓋你改過的公版）')) return;
+    ['pcTopCta','pcFooter','pcTagsBase'].forEach(id => $(id).value = DEFAULTS[id]);
+    save(); render();
+  });
+  $('btnClearPin').addEventListener('click', () => {
+    if (!confirm('清空置頂留言的當集開場句？（公版不受影響）')) return;
+    $('pinEpLine').value = '';
+    save(); render();
+  });
+  $('btnResetPin').addEventListener('click', () => {
+    if (!confirm('置頂留言公版還原成 JK 審查最終版？（會覆蓋你改過的內容）')) return;
+    $('pinComment').value = DEFAULTS.pinComment;
+    save(); render();
+  });
+
+  /* ── 設定匯出／匯入（跨裝置、防 localStorage 被清）── */
+  function flashMini(btn, msg) {
+    const orig = btn.textContent;
+    btn.textContent = msg;
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = orig; btn.classList.remove('done'); }, 1600);
+  }
+  $('btnExport').addEventListener('click', () => {
+    const payload = { _tool: 'publish-workbench', _version: 1, _exportedAt: new Date().toISOString(), data: {} };
+    ALL_FIELDS.forEach(id => payload.data[id] = $(id).value);
+    payload.data.ytSafety = $('ytSafety').checked;
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const stamp = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    a.href = url; a.download = `上架工作台設定_${stamp}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    flashMini($('btnExport'), '已下載 ✓');
+  });
+  $('btnImport').addEventListener('click', () => $('fileImport').click());
+  $('fileImport').addEventListener('change', (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      let payload;
+      try { payload = JSON.parse(reader.result); }
+      catch (err) { alert('讀取失敗：這不是有效的 JSON 檔。'); e.target.value = ''; return; }
+      const data = (payload && payload.data) ? payload.data : payload;
+      if (!data || typeof data !== 'object') { alert('讀取失敗：檔案內容格式不符。'); e.target.value = ''; return; }
+      const hit = ALL_FIELDS.filter(id => id in data);
+      if (!hit.length) { alert('讀取失敗：檔案裡找不到任何工作台欄位。'); e.target.value = ''; return; }
+      if (!confirm(`即將以檔案內容覆蓋現在的 ${hit.length} 個欄位（含公版）。\n目前內容會被取代，確定嗎？`)) { e.target.value = ''; return; }
+      hit.forEach(id => $(id).value = data[id]);
+      if ('ytSafety' in data) $('ytSafety').checked = !!data.ytSafety;
+      save(); render();
+      alert(`匯入完成：已還原 ${hit.length} 個欄位。`);
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  /* ── 分頁 ── */
+  const TAB_KEYS = ['yt', 'pc', 'pin'];
+  function showTab(key) {
+    if (!TAB_KEYS.includes(key)) key = 'yt';
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === key));
+    TAB_KEYS.forEach(k => $('tab-' + k).classList.toggle('hidden', k !== key));
+    try { localStorage.setItem(KEY + ':tab', key); } catch (e) {}
+  }
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => showTab(tab.dataset.tab));
+  });
+  // 開檔時回到上次停留的分頁
+  let lastTab = 'yt';
+  try { lastTab = localStorage.getItem(KEY + ':tab') || 'yt'; } catch (e) {}
+  showTab(lastTab);
+
+  /* ──────────────────────────────────────────────
+     本集預填（Claude 每集更新這一塊）
+     規則：_id 換了才會自動套用一次；套用前把上一集的當集內容備份進
+     localStorage（KEY:backup:<舊id>）。公版欄位一律不動。
+     你套用後自己改的內容會正常存檔，不會被重複覆蓋。
+  ────────────────────────────────────────────── */
+  const EPISODE_PRESET = {
+    _id: 'ep87-xiaoou-standing-ground-20260821h',
+    _label: 'EP87 小歐｜標題 Mandy 定稿 ✅＋簡介 Jackal 定稿 ✅（章節依 正片.srt，須確認=精剪）',
+    ytTitle: 'EP87 他沒有把自己變感性，太太卻開始願意聽他了：理性的人真正需要改的，可能不是個性 Feat.小歐',
+    ytProse: `跟一個凡事講道理、講效率的人相處，卡住的時候，我們的直覺通常是：他就是個性這樣，要嘛他改，要嘛我忍。
+
+這一集跟小歐聊完，我發現可能剛好相反。
+
+他以前開會聽同事講超過十分鐘，會直接說「我的十分鐘很貴」；每一場爭執都站得住腳，連他自己都承認，自己本質上是個沒什麼同理心的人。上完課一年半，太太從他說什麼都不聽，變成會主動來問他的想法。
+
+你可能以為他是把個性磨掉了——其實他還是那個理性、重效率的小歐。只是改了幾個觀點，相同的事件就能選擇新的反應方式。
+
+理性沒有錯，只是當理性都拿來分「對錯」，那麼壞事的可能就是當下某個人的感受。
+
+如果你身邊也有這樣的人，或是你也遇過類似情況，聽完這集，你會有不同的想法～`,
+    ytChapters: `00:00｜影片開始
+01:26｜第一個執念：我永遠是對的
+02:44｜「我的十分鐘很貴」：真的把關係搞砸過
+06:45｜太太的轉變：從永遠不聽，到主動來問
+10:12｜單方面學溝通，救得了關係嗎
+14:52｜改變了半年，還是被翻舊帳
+21:59｜給還在猶豫的人：沒有速成這回事
+24:23｜36度關係 vs 伴侶必修課，差在哪
+28:53｜這堂課不適合誰`,
+    ytEpTags: '#小歐 #理性 #翻舊帳',
+    ytEpSearchTags: '小歐, 理性, 個性, 站得住腳, 講不聽, 難溝通, 爭對錯, 三輸, 翻舊帳, 單方面改變, 道歉沒有用, 意圖跟意願, 同理心, 針鋒相對, 效率至上, 信任感, 執念, 36度關係, 伴侶必修課',
+    pcTitle: 'EP87 他沒有把自己變感性，太太卻開始願意聽他了：理性的人真正需要改的，可能不是個性 Feat.小歐',
+    pcProse: `跟一個凡事講道理、講效率的人相處，卡住的時候，我們的直覺通常是：他就是個性這樣，要嘛他改，要嘛我忍。
+
+這一集跟小歐聊完，我發現可能剛好相反。
+
+他以前開會聽同事講超過十分鐘，會直接說「我的十分鐘很貴」；每一場爭執都站得住腳，連他自己都承認，自己本質上是個沒什麼同理心的人。上完課一年半，太太從他說什麼都不聽，變成會主動來問他的想法。
+
+你可能以為他是把個性磨掉了——其實他還是那個理性、重效率的小歐。只是改了幾個觀點，相同的事件就能選擇新的反應方式。
+
+理性沒有錯，只是當理性都拿來分「對錯」，那麼壞事的可能就是當下某個人的感受。
+
+如果你身邊也有這樣的人，或是你也遇過類似情況，聽完這集，你會有不同的想法～`,
+    pcEpTags: '小歐,理性,搞砸關係,爭對錯,學員見證',
+    pinEpLine: '如果你身邊也有一個凡事講道理、講效率的人（或你就是那個人），這集應該會很有感——',
+    ytSafety: false
+  };
+
+  (function applyEpisodePreset() {
+    if (!EPISODE_PRESET || !EPISODE_PRESET._id) return;
+    let seen = null;
+    try { seen = localStorage.getItem(KEY + ':presetId'); } catch (e) {}
+    if (seen === EPISODE_PRESET._id) return;           // 這一集已經載過，不再覆蓋
+    const backup = {};
+    EPISODE_FIELDS.forEach(id => backup[id] = $(id).value);
+    try {
+      if (Object.keys(backup).some(k => (backup[k] || '').trim())) {
+        localStorage.setItem(KEY + ':backup:' + (seen || 'previous'), JSON.stringify(backup));
+      }
+      localStorage.setItem(KEY + ':presetId', EPISODE_PRESET._id);
+    } catch (e) {}
+    EPISODE_FIELDS.forEach(id => { if (id in EPISODE_PRESET) $(id).value = EPISODE_PRESET[id]; });
+    if ('ytSafety' in EPISODE_PRESET) $('ytSafety').checked = !!EPISODE_PRESET.ytSafety;
+    save();
+    const h = $('saveHint');
+    h.textContent = '已載入本集預填：' + EPISODE_PRESET._label;
+    h.style.opacity = 1;
+    setTimeout(() => { h.textContent = '已自動儲存 ✓'; h.style.opacity = .35; }, 6000);
+  })();
+
+  render();
+})();
+</script>
+</body>
+</html>
