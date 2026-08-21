@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>上架工作台｜每週上片小站</title>
+<title>上架工作台｜每週上片＋電子報小站</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
@@ -144,6 +144,25 @@
     background: var(--ivory-warm); border-left: 3px solid var(--sand);
     border-radius: 6px; padding: 8px 12px; margin-top: 12px;
   }
+
+  /* 電子報分頁：本週進度列 */
+  .prog-row { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+  .prog-row .prog {
+    display: flex; align-items: center; gap: 6px; margin: 0;
+    font-size: 13.5px; color: var(--text); cursor: pointer;
+  }
+  .prog-row input { accent-color: var(--sage-dark); width: 15px; height: 15px; }
+  .prog-row .prog.done-step { color: var(--sage-dark); }
+
+  /* 電子報分頁：強調句候選 */
+  .emph-list { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+  .emph-list label.emph {
+    display: flex; align-items: flex-start; gap: 8px; margin: 0;
+    background: var(--ivory); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 13.5px; color: var(--text); line-height: 1.6; cursor: pointer;
+  }
+  .emph-list label.emph input { accent-color: var(--rose-dark); margin-top: 3px; flex: none; }
+  .emph-list label.emph.on { border-color: var(--rose-dark); background: #fff; }
 </style>
 </head>
 <body>
@@ -152,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。公版改一次，永久記住（存在這台電腦的瀏覽器裡）。</p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。</p>
 
   <div class="toolbar">
     <div class="grp">
@@ -175,6 +194,7 @@
     <button class="tab active" data-tab="yt">YouTube 簡介</button>
     <button class="tab" data-tab="pc">Podcast 節目介紹</button>
     <button class="tab" data-tab="pin">置頂留言</button>
+    <button class="tab" data-tab="nl">電子報排版</button>
   </div>
 
   <!-- ═══════════ YouTube ═══════════ -->
@@ -333,6 +353,75 @@
       </div>
     </div>
   </div>
+
+  <!-- ═══════════ 電子報排版 ═══════════ -->
+  <div id="tab-nl" class="hidden">
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h2>本週進度</h2>
+          <div class="prog-row" id="nlProgRow">
+            <label class="prog"><input type="checkbox" data-prog="0">文章預填</label>
+            <label class="prog"><input type="checkbox" data-prog="1">標題定稿</label>
+            <label class="prog"><input type="checkbox" data-prog="2">強調句拍板</label>
+            <label class="prog"><input type="checkbox" data-prog="3">docx 產出</label>
+            <label class="prog"><input type="checkbox" data-prog="4">測試信確認</label>
+            <label class="prog"><input type="checkbox" data-prog="5">正式發送</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>本週內容</h2>
+          <label>電子報標題</label>
+          <input type="text" id="nlTitle" placeholder="例：你不用改變個性，也能讓關係變好！">
+          <label>Notion 原文連結（備查）</label>
+          <input type="text" id="nlNotion" placeholder="https://app.notion.com/p/…">
+          <label>內文全文（不含開場問候與結尾——那兩塊由公版自動接上）</label>
+          <textarea id="nlProse" class="tall" style="min-height:260px" placeholder="Claude 每週抓 Notion 後預填；段落已按「句號後才換行、一個完整意思一段」重組"></textarea>
+          <label>強調句候選（洞察鏈核心句・勾選＝拍板要換色的句子，寧少勿多）</label>
+          <div id="nlEmphList" class="emph-list"></div>
+          <button class="ghost" id="btnClearNl">🧹 清空本週內容（公版不動）</button>
+        </div>
+
+        <div class="card">
+          <h2>公版（改一次記住）</h2>
+          <details class="pubban" open>
+            <summary>展開編輯公版</summary>
+            <label>開場問候（接在最前面）</label>
+            <textarea id="nlGreeting" class="mid" style="min-height:56px"></textarea>
+            <label>結尾署名（接在內文後）</label>
+            <input type="text" id="nlSignature">
+            <label>PS 好消息報報（免費試看＋訂閱者折扣碼；折扣碼換了記得改）</label>
+            <textarea id="nlPs" class="mid" style="min-height:90px"></textarea>
+            <button class="ghost" id="btnResetNl">↩︎ 公版還原預設</button>
+          </details>
+        </div>
+      </div>
+
+      <div class="sticky">
+        <div class="card">
+          <h2>成品預覽 <span style="margin-left:auto; font-size:12px; color:var(--text-light);" id="cntNl">0 字</span></h2>
+          <div class="preview-box" id="nlPreview"><span class="preview-empty">左邊內容就位後，這裡即時組裝……</span></div>
+          <div class="btns">
+            <button class="copy primary" data-copy="nlFull">📋 複製完整內文（貼 Systeme）</button>
+            <button class="copy" data-copy="nlTitle">複製標題</button>
+            <button class="copy" data-copy="nlEmph">複製已選強調句</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>發送前 30 秒檢查</h2>
+          <ul class="checklist">
+            <li>原文一字不改：只修錯字，語氣用詞全保留</li>
+            <li>段落規則：句號後才換行、一個完整意思一段</li>
+            <li>強調句已拍板、寧少勿多（選洞察鏈，不選金句宣言）</li>
+            <li>PS 好消息報報＝實際內容（不是占位提示；折扣碼效期沒過）</li>
+            <li>docx 交付版＝煙玉暖根 V2（強調句拍板後跟 Claude 說一聲產檔）</li>
+            <li>🚨 先發「管理員測試信」，收到確認沒問題才正式發送</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -407,11 +496,16 @@
       '  › 投稿「解扣信箱」：lion2509@jackalchatnlp.com',
       '  › 合作洽詢 (Email)：lion.mcn2311@gmail.com',
       '  › LINE 即時客服：https://line.me/R/ti/p/@572klveu'
-    ].join('\n')
+    ].join('\n'),
+    // 電子報公版（2026-08-21 新增；開場與結尾取自 Notion 每週固定寫法）
+    nlGreeting: '嗨～我是Jackal 這週好嗎？',
+    nlSignature: 'peace~',
+    nlPs: 'PS. 好消息報報\n（⚠️ 占位提示：把上一週的好消息段落貼進來——免費試看影片＋訂閱者專屬折扣碼——改一次永久記住）'
   };
   const EPISODE_FIELDS = ['ytTitle', 'ytProse', 'ytChapters', 'ytEpTags', 'ytEpSearchTags', 'pcTitle', 'pcProse', 'pcEpTags', 'pinEpLine'];
+  const NL_FIELDS = ['nlTitle', 'nlNotion', 'nlProse'];
   const PUBBAN_FIELDS = Object.keys(DEFAULTS);
-  const ALL_FIELDS = [...EPISODE_FIELDS, ...PUBBAN_FIELDS];
+  const ALL_FIELDS = [...EPISODE_FIELDS, ...NL_FIELDS, ...PUBBAN_FIELDS];
 
   const $ = id => document.getElementById(id);
 
@@ -483,6 +577,11 @@
     return [$('pcTagsBase').value, $('pcEpTags').value].join(',')
       .split(/[,，]/).map(t => t.trim().replace(/^#/, '')).filter(Boolean).join(',');
   }
+  function nlFull() {
+    // 電子報 Systeme 貼上版：開場問候 → 內文 → 結尾署名 → PS 好消息報報
+    return [$('nlGreeting').value.trim(), $('nlProse').value.trim(), $('nlSignature').value.trim(), $('nlPs').value.trim()]
+      .filter(Boolean).join('\n\n');
+  }
 
   /* ── 預覽與字數 ── */
   function render() {
@@ -503,6 +602,12 @@
     else { $('pinPreview').innerHTML = '<span class="preview-empty">公版已載入，這裡即時組裝……</span>'; }
     $('cntPin').textContent = pin.length + ' 字';
 
+    const nl = nlFull();
+    $('nlPreview').innerHTML = '';
+    if (nl) { $('nlPreview').textContent = nl; }
+    else { $('nlPreview').innerHTML = '<span class="preview-empty">左邊內容就位後，這裡即時組裝……</span>'; }
+    $('cntNl').textContent = nl.length + ' 字';
+
     const tLen = $('ytTitle').value.length;
     $('cntTitle').textContent = tLen + ' / 100';
     $('cntTitle').classList.toggle('over', tLen > 100);
@@ -515,9 +620,11 @@
 
   /* ── 複製 ── */
   const COPY_SOURCES = {
-    ytFull, ytSearch, pcFull, pcTags, pinFull,
+    ytFull, ytSearch, pcFull, pcTags, pinFull, nlFull,
     ytTitle: () => $('ytTitle').value.trim(),
-    pcTitle: () => $('pcTitle').value.trim()
+    pcTitle: () => $('pcTitle').value.trim(),
+    nlTitle: () => $('nlTitle').value.trim(),
+    nlEmph: () => nlEmphSelected()
   };
   function doCopy(text, btn) {
     const finish = ok => {
@@ -578,6 +685,16 @@
     $('pinComment').value = DEFAULTS.pinComment;
     save(); render();
   });
+  $('btnClearNl').addEventListener('click', () => {
+    if (!confirm('清空電子報本週內容？（公版與強調句候選不受影響）')) return;
+    NL_FIELDS.forEach(id => $(id).value = '');
+    save(); render();
+  });
+  $('btnResetNl').addEventListener('click', () => {
+    if (!confirm('電子報公版還原預設？（會覆蓋你改過的開場／署名／PS）')) return;
+    ['nlGreeting', 'nlSignature', 'nlPs'].forEach(id => $(id).value = DEFAULTS[id]);
+    save(); render();
+  });
 
   /* ── 設定匯出／匯入（跨裝置、防 localStorage 被清）── */
   function flashMini(btn, msg) {
@@ -624,7 +741,7 @@
   });
 
   /* ── 分頁 ── */
-  const TAB_KEYS = ['yt', 'pc', 'pin'];
+  const TAB_KEYS = ['yt', 'pc', 'pin', 'nl'];
   function showTab(key) {
     if (!TAB_KEYS.includes(key)) key = 'yt';
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === key));
@@ -708,6 +825,109 @@
     h.textContent = '已載入本集預填：' + EPISODE_PRESET._label;
     h.style.opacity = 1;
     setTimeout(() => { h.textContent = '已自動儲存 ✓'; h.style.opacity = .35; }, 6000);
+  })();
+
+  /* ──────────────────────────────────────────────
+     電子報排版：本週預填（Claude 每週更新這一塊）
+     規則同 EPISODE_PRESET：_id 換了才套用一次、套用前備份、公版不動。
+     ⚠️ 部署腳本會把下方兩個 NL 預填標記之間整塊換成 null——
+     當週全文只留在本機版，公開網頁版不帶（公版與清單照常上線）。
+  ────────────────────────────────────────────── */
+  const NEWSLETTER_PRESET = null; // 網頁版不帶當週電子報全文（部署腳本自動清空）
+
+  const nlPresetId = () => (NEWSLETTER_PRESET && NEWSLETTER_PRESET._id) ? NEWSLETTER_PRESET._id : 'no-preset';
+
+  /* ── 強調句拍板（勾選狀態跟著本週 _id 存）── */
+  function nlEmphState() {
+    try {
+      const o = JSON.parse(localStorage.getItem(KEY + ':nlEmph')) || {};
+      if (o.id === nlPresetId()) return o.checked || [];
+    } catch (e) {}
+    return [];
+  }
+  function nlEmphSave(checked) {
+    try { localStorage.setItem(KEY + ':nlEmph', JSON.stringify({ id: nlPresetId(), checked })); } catch (e) {}
+  }
+  function nlEmphSelected() {
+    const cands = (NEWSLETTER_PRESET && NEWSLETTER_PRESET.emphasis) || [];
+    const checked = nlEmphState();
+    return cands.filter((_, i) => checked.includes(i)).join('\n');
+  }
+  function renderNlEmph() {
+    const box = $('nlEmphList');
+    const cands = (NEWSLETTER_PRESET && NEWSLETTER_PRESET.emphasis) || [];
+    if (!cands.length) {
+      box.innerHTML = '<div class="preview-empty" style="font-size:12.5px;">（網頁版不帶當週候選句——本機版開檔即見，由 Claude 每週預填）</div>';
+      return;
+    }
+    const checked = nlEmphState();
+    box.innerHTML = '';
+    cands.forEach((s, i) => {
+      const lab = document.createElement('label');
+      lab.className = 'emph' + (checked.includes(i) ? ' on' : '');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = checked.includes(i);
+      cb.addEventListener('change', () => {
+        const now = nlEmphState();
+        const idx = now.indexOf(i);
+        if (cb.checked && idx === -1) now.push(i);
+        if (!cb.checked && idx !== -1) now.splice(idx, 1);
+        nlEmphSave(now);
+        lab.classList.toggle('on', cb.checked);
+      });
+      const span = document.createElement('span');
+      span.textContent = s;
+      lab.appendChild(cb); lab.appendChild(span);
+      box.appendChild(lab);
+    });
+  }
+
+  /* ── 本週進度（跟著本週 _id 存，換週自動歸零）── */
+  function nlProgLoad() {
+    let checks = [];
+    try {
+      const o = JSON.parse(localStorage.getItem(KEY + ':nlProg')) || {};
+      if (o.id === nlPresetId()) checks = o.checks || [];
+    } catch (e) {}
+    document.querySelectorAll('#nlProgRow input').forEach((cb, i) => {
+      cb.checked = !!checks[i];
+      cb.parentElement.classList.toggle('done-step', cb.checked);
+    });
+  }
+  function nlProgSave() {
+    const checks = Array.from(document.querySelectorAll('#nlProgRow input')).map(cb => cb.checked);
+    try { localStorage.setItem(KEY + ':nlProg', JSON.stringify({ id: nlPresetId(), checks })); } catch (e) {}
+  }
+  document.querySelectorAll('#nlProgRow input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.parentElement.classList.toggle('done-step', cb.checked);
+      nlProgSave();
+    });
+  });
+
+  (function applyNewsletterPreset() {
+    if (!NEWSLETTER_PRESET || !NEWSLETTER_PRESET._id) { renderNlEmph(); nlProgLoad(); return; }
+    let seen = null;
+    try { seen = localStorage.getItem(KEY + ':nlPresetId'); } catch (e) {}
+    if (seen === NEWSLETTER_PRESET._id) { renderNlEmph(); nlProgLoad(); return; }
+    const backup = {};
+    NL_FIELDS.forEach(id => backup[id] = $(id).value);
+    try {
+      if (Object.keys(backup).some(k => (backup[k] || '').trim())) {
+        localStorage.setItem(KEY + ':nlBackup:' + (seen || 'previous'), JSON.stringify(backup));
+      }
+      localStorage.setItem(KEY + ':nlPresetId', NEWSLETTER_PRESET._id);
+      localStorage.removeItem(KEY + ':nlEmph');
+      localStorage.removeItem(KEY + ':nlProg');
+    } catch (e) {}
+    NL_FIELDS.forEach(id => { if (id in NEWSLETTER_PRESET) $(id).value = NEWSLETTER_PRESET[id]; });
+    save();
+    const h = $('saveHint');
+    h.textContent = '已載入本週電子報預填：' + NEWSLETTER_PRESET._label;
+    h.style.opacity = 1;
+    setTimeout(() => { h.textContent = '已自動儲存 ✓'; h.style.opacity = .35; }, 6000);
+    renderNlEmph(); nlProgLoad();
   })();
 
   render();
