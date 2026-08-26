@@ -209,7 +209,7 @@
           <textarea id="ytProse" class="tall" placeholder="講到讓關係變淡的原因，我們很容易想到……"></textarea>
           <label>章節時間軸（⚠️ 精剪定稿才貼；留空＝成品不會出現）</label>
           <textarea id="ytChapters" class="mid" placeholder="00:00 精華搶先看&#10;01:55 小事一：……"></textarea>
-          <label>當集標籤（接在固定 5 個之後）</label>
+          <label>當集標籤（排在固定 5 個之後、#伴侶關係必修課 之前——EP87 線上排列）</label>
           <input type="text" id="ytEpTags" placeholder="#人生啊 #小歐 #情緒價值">
           <label>後台搜尋 tags・當集追加（逗號分隔）</label>
           <input type="text" id="ytEpSearchTags" placeholder="小歐, 人生啊, 情緒價值, 感情變淡">
@@ -226,8 +226,10 @@
             <summary>展開編輯公版</summary>
             <label>置頂課程 CTA（放最前面，未展開就看得到；早鳥期限到了記得改）</label>
             <textarea id="ytTopCta" class="mid" style="min-height:64px"></textarea>
-            <label>固定 hashtag（順序不可動：品牌→本名→伴侶溝通 前三會顯示在標題上方；#伴侶關係必修課 常駐殿後）</label>
+            <label>固定 hashtag・前置 5 個（順序不可動：品牌→本名→伴侶溝通 前三會顯示在標題上方）</label>
             <textarea id="ytFixedTags" class="mid" style="min-height:56px"></textarea>
+            <label>殿後 hashtag（常駐壓軸，自動放在當集標籤之後——照 EP87 線上排列）</label>
+            <input type="text" id="ytTrailTags">
             <label>置底 footer 公版（課程／電子報／收聽／追蹤／聯絡方式，接在最後）</label>
             <textarea id="ytContact" class="tall"></textarea>
             <label>⚠️ 安全提醒文字</label>
@@ -257,6 +259,7 @@
             <li>翻轉句型邏輯成立才用（大事之外還有小事 ≠ 剛好相反）</li>
             <li>章節時間軸＝精剪定稿才貼</li>
             <li>prose 裡不放 hashtag／emoji；標籤只在功能區</li>
+            <li>hashtag 排列＝固定 5 前置 → 當集 → #伴侶關係必修課 殿後（EP87 線上版）</li>
           </ul>
         </div>
       </div>
@@ -432,8 +435,11 @@
 
   const DEFAULTS = {
     ytTopCta: '▍伴侶關係必修課（早鳥至 9/30）\n👉 課程連結：https://lifediscoverybs.kaik.io/courses/79',
-    ytFixedTags: '#人生解扣方程式 #盧育明 #伴侶溝通 #親密關係 #人際關係 #伴侶關係必修課',
-    ytSafetyText: '⚠️ 本集談的是一般關係中的溝通與失衡。如果你的處境涉及暴力、威脅或控制，請把自身的安全放在第一位，優先尋求專業協助。',
+    ytFixedTags: '#人生解扣方程式 #盧育明 #伴侶溝通 #親密關係 #人際關係',
+    // 2026-08-26 Mandy 拍板：#伴侶關係必修課 殿後壓軸（放當集標籤之後）＝EP87 線上實際排列
+    ytTrailTags: '#伴侶關係必修課',
+    // 2026-08-26 Mandy 拍板：安全提醒公版＝EP83 線上實際發布版
+    ytSafetyText: '⚠️ 本集談的是一般關係中的溝通與失衡。如果你遇到的情況不同，還請謹慎處理，或是優先尋求專業協助。',
     ytSearchTagsBase: '人生解扣方程式, 盧育明, Jackal, 伴侶溝通, 親密關係, 人際關係, 感情經營',
     ytContact: [
       '──────────',
@@ -519,9 +525,16 @@
   });
   $('ytSafety').checked = ('ytSafety' in state) ? state.ytSafety : true;
 
-  // 2026-08-21 Mandy 拍板：「伴侶關係必修課」常駐固定標籤（YouTube hashtag ＋ Firstory 基底）——既有 localStorage 一次性補上
-  if ($('ytFixedTags').value.trim() && !$('ytFixedTags').value.includes('#伴侶關係必修課')) {
-    $('ytFixedTags').value = $('ytFixedTags').value.trim() + ' #伴侶關係必修課';
+  // 2026-08-26 Mandy 拍板：hashtag 排列照 EP87 線上版＝固定 5 前置＋當集居中＋#伴侶關係必修課 殿後
+  // （2026-08-21 舊制曾把它併進 ytFixedTags 第 6 位——既有 localStorage 一次性搬到殿後欄）
+  if ($('ytFixedTags').value.includes('#伴侶關係必修課')) {
+    $('ytFixedTags').value = $('ytFixedTags').value.replace(/#伴侶關係必修課/g, '').replace(/\s+/g, ' ').trim();
+    if (!$('ytTrailTags').value.trim()) $('ytTrailTags').value = DEFAULTS.ytTrailTags;
+    save();
+  }
+  // 2026-08-26 Mandy 拍板：安全提醒公版改採 EP83 線上版——存的還是舊公版就一次性換新（自訂過的不動）
+  if ($('ytSafetyText').value.trim() === '⚠️ 本集談的是一般關係中的溝通與失衡。如果你的處境涉及暴力、威脅或控制，請把自身的安全放在第一位，優先尋求專業協助。') {
+    $('ytSafetyText').value = DEFAULTS.ytSafetyText;
     save();
   }
   if ($('pcTagsBase').value.trim() && !$('pcTagsBase').value.includes('伴侶關係必修課')) {
@@ -546,7 +559,8 @@
 
   /* ── 組裝 ── */
   function ytHashtags() {
-    return [$('ytFixedTags').value.trim(), $('ytEpTags').value.trim()].filter(Boolean).join(' ');
+    // 排列照 EP87 線上版（2026-08-26 Mandy 拍板）：固定 5 前置 → 當集標籤 → #伴侶關係必修課 殿後
+    return [$('ytFixedTags').value.trim(), $('ytEpTags').value.trim(), $('ytTrailTags').value.trim()].filter(Boolean).join(' ');
   }
   function ytFull() {
     // 依頻道實際版型（EP81/EP82）：置頂 CTA → 章節（無標題行）→ prose → hashtag → ⚠️ → 置底 footer
@@ -669,7 +683,7 @@
   });
   $('btnResetYt').addEventListener('click', () => {
     if (!confirm('YouTube 公版全部還原預設？（會覆蓋你改過的公版）')) return;
-    ['ytTopCta','ytFixedTags','ytContact','ytSafetyText','ytSearchTagsBase'].forEach(id => $(id).value = DEFAULTS[id]);
+    ['ytTopCta','ytFixedTags','ytTrailTags','ytContact','ytSafetyText','ytSearchTagsBase'].forEach(id => $(id).value = DEFAULTS[id]);
     save(); render();
   });
   $('btnResetPc').addEventListener('click', () => {
