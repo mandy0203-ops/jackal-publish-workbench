@@ -550,8 +550,14 @@
       const s = {};
       ALL_FIELDS.forEach(id => s[id] = $(id).value);
       s.ytSafety = $('ytSafety').checked;
-      localStorage.setItem(KEY, JSON.stringify(s));
       const h = $('saveHint');
+      try {
+        localStorage.setItem(KEY, JSON.stringify(s));
+      } catch (e) {
+        h.textContent = '⚠️ 瀏覽器封鎖網站資料：內容不會被記住（可先用，重整會消失）';
+        h.style.opacity = 1;
+        return;
+      }
       h.style.opacity = 1;
       setTimeout(() => h.style.opacity = .35, 1200);
     }, 300);
