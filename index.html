@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-09-15 14:33 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-09-15 14:39 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -818,7 +818,11 @@
 如果你也有想改變卻一直卡著的事，這集或許能給你一點不一樣的角度。`,
     pcEpTags: '改變,戒酒,身分認同,自我成長,夫妻對談',
     pinEpLine: '這集聊的是我自己的改變經驗。如果你心裡也有一件「想改但一直卡著」的事，歡迎留言說說看是什麼——',
-    ytSafety: false
+    ytSafety: true,
+    // 本集專用安全提醒（Mandy 2026-09-15 提供原文）；下一集 preset 未帶此欄時會自動還原公版
+    ytSafetyText: `本集談論戒菸戒酒的個人經驗，內容涉及成癮行為的自我觀察，非鼓勵飲酒或吸菸。未滿 18 歲禁止飲酒，吸菸有害健康。
+未滿 18 歲禁止飲酒　·　酒後不開車
+吸菸有害健康　·　戒菸專線 0800-63-63-63`
   };
 
   (function applyEpisodePreset() {
@@ -836,6 +840,8 @@
     } catch (e) {}
     EPISODE_FIELDS.forEach(id => { if (id in EPISODE_PRESET) $(id).value = EPISODE_PRESET[id]; });
     if ('ytSafety' in EPISODE_PRESET) $('ytSafety').checked = !!EPISODE_PRESET.ytSafety;
+    // 安全提醒文字＝逐集可覆寫：preset 有帶就用本集專用，沒帶就還原公版 DEFAULTS
+    $('ytSafetyText').value = ('ytSafetyText' in EPISODE_PRESET) ? EPISODE_PRESET.ytSafetyText : DEFAULTS.ytSafetyText;
     save();
     const h = $('saveHint');
     h.textContent = '已載入本集預填：' + EPISODE_PRESET._label;
