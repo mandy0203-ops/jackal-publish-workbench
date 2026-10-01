@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-01 18:07 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-01 18:16 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -434,7 +434,7 @@
   const KEY = 'publish-workbench-v1';
 
   const DEFAULTS = {
-    ytTopCta: '▍伴侶關係必修課（早鳥至 9/30）\n👉 課程連結：https://lifediscoverybs.kaik.io/courses/79',
+    ytTopCta: '▍伴侶關係必修課\n👉 課程連結：https://lifediscoverybs.kaik.io/courses/79',
     ytFixedTags: '#人生解扣方程式 #盧育明 #伴侶溝通 #親密關係 #人際關係',
     // 2026-08-26 Mandy 拍板：#伴侶關係必修課 殿後壓軸（放當集標籤之後）＝EP87 線上實際排列
     ytTrailTags: '#伴侶關係必修課',
@@ -468,7 +468,7 @@
       '  › 合作洽詢 (Email)：lion.mcn2311@gmail.com',
       '  › LINE 即時客服：https://line.me/R/ti/p/@572klveu'
     ].join('\n'),
-    pcTopCta: '▍伴侶關係必修課（早鳥至 9/30）\n👉 課程連結：https://lifediscoverybs.kaik.io/courses/79',
+    pcTopCta: '▍伴侶關係必修課\n👉 課程連結：https://lifediscoverybs.kaik.io/courses/79',
     // ⭐ 置頂留言公版：JK 審查後最終發佈版（2026-07-24 由 Mandy 提供，逐字收錄）
     pinComment: [
       '❶ 完整課程｜《讀懂讓關係卡住的事》',
@@ -532,6 +532,10 @@
     if (!$('ytTrailTags').value.trim()) $('ytTrailTags').value = DEFAULTS.ytTrailTags;
     save();
   }
+  // 2026-10-01 Mandy：伴侶課早鳥優惠已過期——存的 CTA 若還帶「（早鳥至 9/30）」就一次性拿掉（其餘自訂內容不動）
+  ['ytTopCta','pcTopCta'].forEach(id => {
+    if ($(id).value.includes('（早鳥至 9/30）')) { $(id).value = $(id).value.replace(/（早鳥至 9\/30）/g, ''); save(); }
+  });
   // 2026-08-26 Mandy 拍板：安全提醒公版改採 EP83 線上版——存的還是舊公版就一次性換新（自訂過的不動）
   if ($('ytSafetyText').value.trim() === '⚠️ 本集談的是一般關係中的溝通與失衡。如果你的處境涉及暴力、威脅或控制，請把自身的安全放在第一位，優先尋求專業協助。') {
     $('ytSafetyText').value = DEFAULTS.ytSafetyText;
