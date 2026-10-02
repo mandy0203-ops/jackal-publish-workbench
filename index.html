@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 09:41 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 09:42 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -539,7 +539,7 @@
   if ($('ytFixedTags').value.includes('#伴侶關係必修課')) {
     $('ytFixedTags').value = $('ytFixedTags').value.replace(/#伴侶關係必修課/g, '').replace(/\s+/g, ' ').trim();
     if (!$('ytTrailTags').value.trim()) $('ytTrailTags').value = DEFAULTS.ytTrailTags;
-    save();
+    setTimeout(() => save(), 0); // 宣告前不可直接 save()
   }
   // 2026-10-01 Mandy：伴侶課早鳥優惠已過期——存的 CTA 若還帶「（早鳥至 9/30）」就一次性拿掉（其餘自訂內容不動）
   // ⚠️ 這裡還在 let saveTimer 宣告之前，不能直接呼叫 save()（2026-10-02 曾因此整頁腳本中斷）→ 延後一拍再存
