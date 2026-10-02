@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 09:51 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 10:14 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -883,7 +883,15 @@
     if (!EPISODE_PRESET || !EPISODE_PRESET._id) return;
     let seen = null;
     try { seen = localStorage.getItem(KEY + ':presetId'); } catch (e) {}
-    if (seen === EPISODE_PRESET._id) return;           // 這一集已經載過，不再覆蓋
+    if (seen === EPISODE_PRESET._id) {                 // 這一集已經載過，不覆蓋已填內容——
+      // 2026-10-02（EP93 mini 章節空白）：但若某欄是空的而預填有內容，就補上（例：章節後來才補進預填）
+      let filled = false;
+      EPISODE_FIELDS.forEach(id => {
+        if (id in EPISODE_PRESET && !$(id).value.trim() && String(EPISODE_PRESET[id] || '').trim()) { $(id).value = EPISODE_PRESET[id]; filled = true; }
+      });
+      if (filled) save();
+      return;
+    }
     const backup = {};
     EPISODE_FIELDS.forEach(id => backup[id] = $(id).value);
     try {
