@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 10:20 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 10:22 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -219,7 +219,7 @@
           </div>
           <div class="row-check">
             <input type="checkbox" id="ytSponsored">
-            <label for="ytSponsored" style="margin:0; font-size:14px; color:var(--text);">這集是付費業配（影片敘述不放自家課程連結：置頂 CTA 與 footer 課程段自動拿掉——Jackal 2026-10-02 交代）</label>
+            <label for="ytSponsored" style="margin:0; font-size:14px; color:var(--text);">這集是付費業配（自家課程全部不露出：置頂 CTA、footer 課程段、#伴侶關係必修課、置頂留言課程段自動拿掉——Jackal／Mandy 2026-10-02）</label>
           </div>
           <button class="ghost" id="btnClearYt">🧹 清空本集內容（公版不動）</button>
         </div>
@@ -588,7 +588,9 @@
   /* ── 組裝 ── */
   function ytHashtags() {
     // 排列照 EP87 線上版（2026-08-26 Mandy 拍板）：固定 5 前置 → 當集標籤 → #伴侶關係必修課 殿後
-    return [$('ytFixedTags').value.trim(), $('ytEpTags').value.trim(), $('ytTrailTags').value.trim()].filter(Boolean).join(' ');
+    // 付費業配集（ytSponsored）：殿後的 #伴侶關係必修課 一併拿掉（Mandy 2026-10-02）
+    const trail = $('ytSponsored').checked ? '' : $('ytTrailTags').value.trim();
+    return [$('ytFixedTags').value.trim(), $('ytEpTags').value.trim(), trail].filter(Boolean).join(' ');
   }
   function ytFull() {
     // 依頻道實際版型（EP81/EP82）：置頂 CTA → 章節（無標題行）→ prose → hashtag → ⚠️ → 置底 footer
@@ -621,8 +623,12 @@
   }
   function pinFull() {
     // 置頂留言：當集開場句（選填）→ 公版本體
-    return [$('pinEpLine').value.trim(), $('pinComment').value.trim()]
-      .filter(Boolean).join('\n\n');
+    let pin = $('pinComment').value.trim();
+    if ($('ytSponsored').checked) {
+      // 付費業配集：拿掉公版第 ❶ 段自家課程（標題行→說明行→kaik.io 連結→空行），剩下的 ❷ 改編號為 ❶（Mandy 2026-10-02）
+      pin = pin.replace(/❶ 完整課程[^\n]*\n[^\n]*\n[^\n]*lifediscoverybs\.kaik\.io[^\n]*\n\n?/, '').replace(/^❷ /m, '❶ ').trim();
+    }
+    return [$('pinEpLine').value.trim(), pin].filter(Boolean).join('\n\n');
   }
   function pcTags() {
     // Firstory 格式：半形逗號分隔、無空格、無井字號（2026-07-23 Mandy 指定）
