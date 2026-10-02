@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 09:39 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 09:41 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -542,8 +542,9 @@
     save();
   }
   // 2026-10-01 Mandy：伴侶課早鳥優惠已過期——存的 CTA 若還帶「（早鳥至 9/30）」就一次性拿掉（其餘自訂內容不動）
+  // ⚠️ 這裡還在 let saveTimer 宣告之前，不能直接呼叫 save()（2026-10-02 曾因此整頁腳本中斷）→ 延後一拍再存
   ['ytTopCta','pcTopCta'].forEach(id => {
-    if ($(id).value.includes('（早鳥至 9/30）')) { $(id).value = $(id).value.replace(/（早鳥至 9\/30）/g, ''); save(); }
+    if ($(id).value.includes('（早鳥至 9/30）')) { $(id).value = $(id).value.replace(/（早鳥至 9\/30）/g, ''); setTimeout(() => save(), 0); }
   });
   // 2026-08-26 Mandy 拍板：安全提醒公版改採 EP83 線上版——存的還是舊公版就一次性換新（自訂過的不動）
   if ($('ytSafetyText').value.trim() === '⚠️ 本集談的是一般關係中的溝通與失衡。如果你的處境涉及暴力、威脅或控制，請把自身的安全放在第一位，優先尋求專業協助。') {
