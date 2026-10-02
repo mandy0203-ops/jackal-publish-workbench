@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 09:29 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 09:39 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -218,7 +218,6 @@
             <label for="ytSafety" style="margin:0; font-size:14px; color:var(--text);">這集加「⚠️ 安全提醒」（談關係失衡／可能涉及受暴情境時勾選）</label>
           </div>
           <button class="ghost" id="btnClearYt">🧹 清空本集內容（公版不動）</button>
-          <button class="ghost reload-preset" title="清掉「這一集已載入」記號後重新整理，把本集預填重新套進來（公版不動）">↻ 重新載入本集預填</button>
         </div>
 
         <div class="card">
@@ -280,7 +279,6 @@
           <label>Firstory 標籤・當集追加（半形逗號、無空格、無 #；亂貼也會自動整理）</label>
           <input type="text" id="pcEpTags" placeholder="小歐,人生啊,情緒價值">
           <button class="ghost" id="btnClearPc">🧹 清空本集內容（公版不動）</button>
-          <button class="ghost reload-preset" title="清掉「這一集已載入」記號後重新整理，把本集預填重新套進來（公版不動）">↻ 重新載入本集預填</button>
         </div>
         <div class="card">
           <h2>公版（改一次記住）</h2>
@@ -432,6 +430,15 @@
 </div>
 
 <script>
+  // 2026-10-02 診斷用：任何執行錯誤直接顯示在頁面頂端（紅底），方便跨裝置回報
+  window.addEventListener('error', function (ev) {
+    try {
+      var d = document.getElementById('jsErrBanner');
+      if (!d) { d = document.createElement('div'); d.id = 'jsErrBanner'; d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b23b3b;color:#fff;font:13px/1.5 -apple-system,sans-serif;padding:8px 14px;white-space:pre-wrap;word-break:break-all'; document.body ? document.body.appendChild(d) : document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(d); }); }
+      d.textContent += '⚠️ 頁面腳本錯誤：' + (ev.message || ev) + '  @ 第 ' + ev.lineno + ':' + ev.colno + ' 行\n';
+    } catch (e) {}
+  });
+
 (function () {
   const KEY = 'publish-workbench-v1';
 
@@ -867,12 +874,7 @@
     ytSafety: false
   };
 
-  // 2026-10-02：預填一個 _id 只套一次；若本集內容被清空或裝置狀態不同步，可按「↻ 重新載入本集預填」或網址加 ?reload 重套
-  document.querySelectorAll('.reload-preset').forEach(b => b.addEventListener('click', () => {
-    if (!confirm('重新載入本集預填？會覆蓋目前「本集內容」欄位（公版不動）')) return;
-    try { localStorage.removeItem(KEY + ':presetId'); } catch (e) {}
-    location.replace(location.pathname + location.search.replace(/[?&]reload\b/, '') + location.hash);
-  }));
+  // 2026-10-02：預填一個 _id 只套一次；網址加 ?reload 可清掉「已載入」記號重套一次（無 UI，備用）
   if (/[?&]reload\b/.test(location.search)) { try { localStorage.removeItem(KEY + ':presetId'); } catch (e) {} }
   (function applyEpisodePreset() {
     if (!EPISODE_PRESET || !EPISODE_PRESET._id) return;
