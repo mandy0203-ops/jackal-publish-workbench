@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 10:22 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 11:23 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -219,7 +219,7 @@
           </div>
           <div class="row-check">
             <input type="checkbox" id="ytSponsored">
-            <label for="ytSponsored" style="margin:0; font-size:14px; color:var(--text);">這集是付費業配（自家課程全部不露出：置頂 CTA、footer 課程段、#伴侶關係必修課、置頂留言課程段自動拿掉——Jackal／Mandy 2026-10-02）</label>
+            <label for="ytSponsored" style="margin:0; font-size:14px; color:var(--text);">這集是付費業配（自家課程全部不露出：置頂 CTA、footer 課程段、#伴侶關係必修課、置頂留言課程段、Firstory 課名標籤自動拿掉——Jackal／Mandy 2026-10-02）</label>
           </div>
           <button class="ghost" id="btnClearYt">🧹 清空本集內容（公版不動）</button>
         </div>
@@ -632,8 +632,10 @@
   }
   function pcTags() {
     // Firstory 格式：半形逗號分隔、無空格、無井字號（2026-07-23 Mandy 指定）
-    return [$('pcTagsBase').value, $('pcEpTags').value].join(',')
-      .split(/[,，]/).map(t => t.trim().replace(/^#/, '')).filter(Boolean).join(',');
+    const tags = [$('pcTagsBase').value, $('pcEpTags').value].join(',')
+      .split(/[,，]/).map(t => t.trim().replace(/^#/, '')).filter(Boolean);
+    // 付費業配集（ytSponsored）：自家課名標籤一併拿掉（Mandy 2026-10-02）
+    return (($('ytSponsored').checked) ? tags.filter(t => t !== '伴侶關係必修課') : tags).join(',');
   }
   function nlFull() {
     // 電子報 Systeme 貼上版：開場問候 → 內文 → 結尾署名（好消息報報走 Systeme 獨立區塊）
