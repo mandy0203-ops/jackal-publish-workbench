@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 10:14 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-02 10:20 網頁版</span></p>
 
   <div class="toolbar">
     <div class="grp">
@@ -216,6 +216,10 @@
           <div class="row-check">
             <input type="checkbox" id="ytSafety" checked>
             <label for="ytSafety" style="margin:0; font-size:14px; color:var(--text);">這集加「⚠️ 安全提醒」（談關係失衡／可能涉及受暴情境時勾選）</label>
+          </div>
+          <div class="row-check">
+            <input type="checkbox" id="ytSponsored">
+            <label for="ytSponsored" style="margin:0; font-size:14px; color:var(--text);">這集是付費業配（影片敘述不放自家課程連結：置頂 CTA 與 footer 課程段自動拿掉——Jackal 2026-10-02 交代）</label>
           </div>
           <button class="ghost" id="btnClearYt">🧹 清空本集內容（公版不動）</button>
         </div>
@@ -533,6 +537,7 @@
     $(id).value = (id in state) ? state[id] : (DEFAULTS[id] || '');
   });
   $('ytSafety').checked = ('ytSafety' in state) ? state.ytSafety : true;
+  $('ytSponsored').checked = ('ytSponsored' in state) ? !!state.ytSponsored : false;
 
   // 2026-08-26 Mandy 拍板：hashtag 排列照 EP87 線上版＝固定 5 前置＋當集居中＋#伴侶關係必修課 殿後
   // （2026-08-21 舊制曾把它併進 ytFixedTags 第 6 位——既有 localStorage 一次性搬到殿後欄）
@@ -566,6 +571,7 @@
       const s = {};
       ALL_FIELDS.forEach(id => s[id] = $(id).value);
       s.ytSafety = $('ytSafety').checked;
+      s.ytSponsored = $('ytSponsored').checked;
       const h = $('saveHint');
       try {
         localStorage.setItem(KEY, JSON.stringify(s));
@@ -588,13 +594,19 @@
     // 依頻道實際版型（EP81/EP82）：置頂 CTA → 章節（無標題行）→ prose → hashtag → ⚠️ → 置底 footer
     // 版型（2026-09-18 Mandy 上架版）：置頂 CTA → 內容說明 → 章節 → ▍影片簡介 → hashtag → footer
     const prose = $('ytProse').value.trim();
+    const sponsored = $('ytSponsored').checked;   // 付費業配集：敘述內不放自家課程連結（Jackal 2026-10-02）
+    let contact = $('ytContact').value.trim();
+    if (sponsored) {
+      // 拿掉 footer 裡的自家課程段（❯ 課程標題行 → 副標行 → kaik.io 連結 → 空行），其餘公版照舊
+      contact = contact.replace(/❯ 《[^\n]*》\n[^\n]*\nhttps:\/\/lifediscoverybs\.kaik\.io\/[^\n]*\n\n?/g, '').trim();
+    }
     const blocks = [
-      $('ytTopCta').value.trim(),
+      sponsored ? '' : $('ytTopCta').value.trim(),
       $('ytSafety').checked ? $('ytSafetyText').value.trim() : '',
       $('ytChapters').value.trim(),
       prose ? '▍影片簡介\n\n' + prose : '',
       ytHashtags(),
-      $('ytContact').value.trim()
+      contact
     ];
     return blocks.filter(Boolean).join('\n\n');
   }
@@ -657,6 +669,7 @@
 
   ALL_FIELDS.forEach(id => $(id).addEventListener('input', () => { save(); render(); }));
   $('ytSafety').addEventListener('change', () => { save(); render(); });
+  $('ytSponsored').addEventListener('change', () => { save(); render(); });
 
   /* ── 複製 ── */
   const COPY_SOURCES = {
@@ -747,6 +760,7 @@
     const payload = { _tool: 'publish-workbench', _version: 1, _exportedAt: new Date().toISOString(), data: {} };
     ALL_FIELDS.forEach(id => payload.data[id] = $(id).value);
     payload.data.ytSafety = $('ytSafety').checked;
+    payload.data.ytSponsored = $('ytSponsored').checked;
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -773,6 +787,7 @@
       if (!confirm(`即將以檔案內容覆蓋現在的 ${hit.length} 個欄位（含公版）。\n目前內容會被取代，確定嗎？`)) { e.target.value = ''; return; }
       hit.forEach(id => $(id).value = data[id]);
       if ('ytSafety' in data) $('ytSafety').checked = !!data.ytSafety;
+      if ('ytSponsored' in data) $('ytSponsored').checked = !!data.ytSponsored;
       save(); render();
       alert(`匯入完成：已還原 ${hit.length} 個欄位。`);
       e.target.value = '';
@@ -803,7 +818,7 @@
      你套用後自己改的內容會正常存檔，不會被重複覆蓋。
   ────────────────────────────────────────────── */
   const EPISODE_PRESET = {
-    _id: 'ep93-chen-huanting-workplace-eq-20261002b',
+    _id: 'ep93-chen-huanting-workplace-eq-20261002c',
     _label: 'EP93 陳煥庭老師・職場高情商溝通｜⭐ 標題＋簡介 Mandy 定稿（10/1）；章節＋導購（JACKAL250）已寫入',
     ytTitle: 'EP93 好好說話，不代表什麼都要答應！不想委屈自己，也不想把關係搞僵，怎麼拒絕、怎麼談合作？真正的高情商，是有同理也有界限。職場溝通 ft. 陳煥庭',
     ytProse: `我在談溝通的時候很常講一件事：同樣一句話，遇到不同的人、不同的時機，反應可能完全不一樣，所以我從來不敢說哪種說法一定可以或不可以，真的很看對象是誰。
@@ -874,7 +889,9 @@
 🎁 募資優惠27折起，輸入「JACKAL250」現省$250！
 🔍 查看課程：https://www.pressplay.cc/link/s/AD6D3451`,
     // 職場主題，無成癮／暴力／控制情境，不掛安全提醒
-    ytSafety: false
+    ytSafety: false,
+    // 付費業配集：影片敘述不放自家課程連結（Jackal 2026-10-02 交代，之後課程業配比照）
+    ytSponsored: true
   };
 
   // 2026-10-02：預填一個 _id 只套一次；網址加 ?reload 可清掉「已載入」記號重套一次（無 UI，備用）
@@ -902,6 +919,7 @@
     } catch (e) {}
     EPISODE_FIELDS.forEach(id => { if (id in EPISODE_PRESET) $(id).value = EPISODE_PRESET[id]; });
     if ('ytSafety' in EPISODE_PRESET) $('ytSafety').checked = !!EPISODE_PRESET.ytSafety;
+    $('ytSponsored').checked = !!EPISODE_PRESET.ytSponsored;   // 沒帶＝非業配集，自動取消勾選
     // 安全提醒文字＝逐集可覆寫：preset 有帶就用本集專用，沒帶就還原公版 DEFAULTS
     $('ytSafetyText').value = ('ytSafetyText' in EPISODE_PRESET) ? EPISODE_PRESET.ytSafetyText : DEFAULTS.ytSafetyText;
     save();
