@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-13 14:13 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-13 14:15 網頁版</span></p>
   <div id="editingBar" style="display:none;margin:-4px 0 14px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;font-size:13px;line-height:1.7"></div>
 
   <div class="toolbar">
@@ -1038,7 +1038,7 @@
     const p = (d.projects || []).find(x => x.id === pid);
     if (!p) return show(`<span style="opacity:.6">剪輯進度板找不到這一集（${pid}）</span>　${link}`);
     const sc = document.createElement('script');
-    sc.src = DASH + '/assets/editing.js';
+    sc.src = DASH + '/assets/editing.js?t=' + Date.now();
     sc.onerror = offline;
     sc.onload = () => {
       const E = window.Editing; E.setHolidays(d.holidays);
