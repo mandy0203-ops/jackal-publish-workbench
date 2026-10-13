@@ -171,7 +171,8 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-13 14:08 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-13 14:13 網頁版</span></p>
+  <div id="editingBar" style="display:none;margin:-4px 0 14px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;font-size:13px;line-height:1.7"></div>
 
   <div class="toolbar">
     <div class="grp">
@@ -828,6 +829,7 @@
   ────────────────────────────────────────────── */
   const EPISODE_PRESET = {
     _id: 'ep95-haomei-daughter-view-20261013a',
+    editingId: 'ep_seed_08',   // 對應晨光儀表板剪輯進度板那一支（顯示排程用）
     _label: 'EP95 女兒的視角（Feat. 郝妹）｜標題 A＋#郝家庭 Mandy 拍板（10/13）',
     ytTitle: 'EP95 孩子是從什麼時候開始，不怕跟爸媽說話的？從女兒的視角，看父母改變後留下的影響 Feat.郝妹',
     ytProse: `上一集郝哥講的是當爸爸的那一端，
@@ -874,6 +876,8 @@
     // 一般親子溝通，無暴力／控制情境，預設不掛安全提醒
     ytSafety: false
   };
+  window.EDITING_ID = (EPISODE_PRESET && EPISODE_PRESET.editingId) || '';   // 給下方剪輯連動用
+
   // 2026-10-02：預填一個 _id 只套一次；網址加 ?reload 可清掉「已載入」記號重套一次（無 UI，備用）
   if (/[?&]reload\b/.test(location.search)) { try { localStorage.removeItem(KEY + ':presetId'); } catch (e) {} }
   (function applyEpisodePreset() {
@@ -1013,6 +1017,41 @@
   })();
 
   render();
+})();
+</script>
+<!-- 剪輯進度連動（2026-10-13）：讀晨光儀表板 /editing/summary（唯讀），顯示本集上架日／送審日／剩幾關。
+     儀表板沒開或讀不到 → 只顯示連結，不影響工作台其他功能。打勾仍只在剪輯進度板。 -->
+<script>
+(function () {
+  const DASH = 'http://localhost:8855';
+  const bar = document.getElementById('editingBar');
+  let pid = '';
+  pid = window.EDITING_ID || '';
+  const boardUrl = DASH + '/modules/editing_board.html' + (pid ? '#proj-' + pid : '');
+  const link = `<a href="${boardUrl}" target="_blank" rel="noopener">🎬 開剪輯進度板 ↗</a>`;
+  const show = html => { bar.innerHTML = html; bar.style.display = 'block'; };
+  const offline = () => show(`<span style="opacity:.6">剪輯排程讀不到（晨光儀表板沒開，或這個瀏覽器擋了本機連線）</span>　${link}`);
+  if (!pid) { show(link); return; }
+  const ctl = new AbortController(); setTimeout(() => ctl.abort(), 2500);
+  fetch(DASH + '/editing/summary', { signal: ctl.signal, cache: 'no-store' }).then(r => r.json()).then(d => {
+    if (!d || !d.ok) return offline();
+    const p = (d.projects || []).find(x => x.id === pid);
+    if (!p) return show(`<span style="opacity:.6">剪輯進度板找不到這一集（${pid}）</span>　${link}`);
+    const sc = document.createElement('script');
+    sc.src = DASH + '/assets/editing.js';
+    sc.onerror = offline;
+    sc.onload = () => {
+      const E = window.Editing; E.setHolidays(d.holidays);
+      const c = E.compute(p, { ...E.DEFAULT_SETTINGS, ...(d.settings || {}) });
+      const wd = k => k ? E.short(k) + '（' + '日一二三四五六'[new Date(k + 'T00:00').getDay()] + '）' : '—';
+      const left = c.stages.filter(s => !s.done).map(s => s.label);
+      const parts = [`<b>${p.guest} · ${p.title}</b>`, `上架 <b>${wd(p.air_date)}</b>${c.daysToAir != null && !c.allDone ? (c.daysToAir < 0 ? `（<span style="color:#B85C5C">已過 ${-c.daysToAir} 天</span>）` : `（還有 ${c.daysToAir} 天）`) : ''}`];
+      if (c.earlyPublish) parts.push(`<span style="color:#B85C5C">🏖 ${c.airHoliday} → ${wd(c.publishBy)} 前排程發布</span>`);
+      parts.push(c.allDone ? '全部關卡完成 ✓' : `還剩：${left.join('、')}`);
+      show(parts.join('　·　') + '　' + link);
+    };
+    document.head.appendChild(sc);
+  }).catch(offline);
 })();
 </script>
 </body>
