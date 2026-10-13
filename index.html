@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-13 14:15 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-13 14:17 網頁版</span></p>
   <div id="editingBar" style="display:none;margin:-4px 0 14px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;font-size:13px;line-height:1.7"></div>
 
   <div class="toolbar">
@@ -1047,7 +1047,8 @@
       const left = c.stages.filter(s => !s.done).map(s => s.label);
       const parts = [`<b>${p.guest} · ${p.title}</b>`, `上架 <b>${wd(p.air_date)}</b>${c.daysToAir != null && !c.allDone ? (c.daysToAir < 0 ? `（<span style="color:#B85C5C">已過 ${-c.daysToAir} 天</span>）` : `（還有 ${c.daysToAir} 天）`) : ''}`];
       if (c.earlyPublish) parts.push(`<span style="color:#B85C5C">🏖 ${c.airHoliday} → ${wd(c.publishBy)} 前排程發布</span>`);
-      parts.push(c.allDone ? '全部關卡完成 ✓' : `還剩：${left.join('、')}`);
+      if (c.blocked) parts.push(`<span style="color:#A8875A">⏳ 等 JK：${c.waitingJK.map(w => w.label).join('、')}，收到就能上架</span>`);
+      else parts.push(c.allDone ? '全部關卡完成 ✓' : `還剩：${left.join('、')}`);
       show(parts.join('　·　') + '　' + link);
     };
     document.head.appendChild(sc);
