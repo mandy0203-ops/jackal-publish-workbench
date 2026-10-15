@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-13 14:17 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-15 20:08 網頁版</span></p>
   <div id="editingBar" style="display:none;margin:-4px 0 14px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;font-size:13px;line-height:1.7"></div>
 
   <div class="toolbar">
@@ -595,7 +595,7 @@
   }
   function ytFull() {
     // 依頻道實際版型（EP81/EP82）：置頂 CTA → 章節（無標題行）→ prose → hashtag → ⚠️ → 置底 footer
-    // 版型（2026-09-18 Mandy 上架版）：置頂 CTA → 內容說明 → 章節 → ▍影片簡介 → hashtag → footer
+    // 版型（2026-09-18 Mandy 上架版）：置頂 CTA → 內容說明 → 章節 → 簡介（無標頭）→ hashtag → footer
     const prose = $('ytProse').value.trim();
     const sponsored = $('ytSponsored').checked;   // 付費業配集：敘述內不放自家課程連結（Jackal 2026-10-02）
     let contact = $('ytContact').value.trim();
@@ -607,7 +607,7 @@
       sponsored ? '' : $('ytTopCta').value.trim(),
       $('ytSafety').checked ? $('ytSafetyText').value.trim() : '',
       $('ytChapters').value.trim(),
-      prose ? '▍影片簡介\n\n' + prose : '',
+      prose,   // 2026-10-15 Mandy：不加「▍影片簡介」標頭
       ytHashtags(),
       contact
     ];
