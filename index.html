@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-15 20:08 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-16 EP95 定稿網頁版</span></p>
   <div id="editingBar" style="display:none;margin:-4px 0 14px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;font-size:13px;line-height:1.7"></div>
 
   <div class="toolbar">
@@ -210,7 +210,7 @@
           <textarea id="ytProse" class="tall" placeholder="講到讓關係變淡的原因，我們很容易想到……"></textarea>
           <label>章節時間軸（⚠️ 精剪定稿才貼；留空＝成品不會出現）</label>
           <textarea id="ytChapters" class="mid" placeholder="00:00 精華搶先看&#10;01:55 小事一：……"></textarea>
-          <label>當集標籤（排在固定 5 個之後、#伴侶關係必修課 之前——EP87 線上排列）</label>
+          <label>當集標籤（排在固定標籤與 #伴侶關係必修課 之後）</label>
           <input type="text" id="ytEpTags" placeholder="#人生啊 #小歐 #情緒價值">
           <label>後台搜尋 tags・當集追加（逗號分隔）</label>
           <input type="text" id="ytEpSearchTags" placeholder="小歐, 人生啊, 情緒價值, 感情變淡">
@@ -233,7 +233,7 @@
             <textarea id="ytTopCta" class="mid" style="min-height:64px"></textarea>
             <label>固定 hashtag・前置 5 個（順序不可動：品牌→本名→伴侶溝通 前三會顯示在標題上方）</label>
             <textarea id="ytFixedTags" class="mid" style="min-height:56px"></textarea>
-            <label>殿後 hashtag（常駐壓軸，自動放在當集標籤之後——照 EP87 線上排列）</label>
+            <label>常駐 hashtag（固定標籤之後、當集標籤之前）</label>
             <input type="text" id="ytTrailTags">
             <label>置底 footer 公版（課程／電子報／收聽／追蹤／聯絡方式，接在最後）</label>
             <textarea id="ytContact" class="tall"></textarea>
@@ -450,7 +450,7 @@
   const DEFAULTS = {
     ytTopCta: '',   // 2026-10-02 Mandy：說明欄頂端課程 CTA 不再放（EP92 線上版亦無）
     ytFixedTags: '#人生解扣方程式 #盧育明 #伴侶溝通 #親密關係 #人際關係',
-    // 2026-08-26 Mandy 拍板：#伴侶關係必修課 殿後壓軸（放當集標籤之後）＝EP87 線上實際排列
+    // EP95 上架定稿：#伴侶關係必修課 排在固定 5 個之後、當集標籤之前
     ytTrailTags: '#伴侶關係必修課',
     // 2026-08-26 Mandy 拍板：安全提醒公版＝EP83 線上實際發布版
     ytSafetyText: '⚠️ 本集談的是一般關係中的溝通與失衡。如果你遇到的情況不同，還請謹慎處理，或是優先尋求專業協助。',
@@ -540,8 +540,8 @@
   $('ytSafety').checked = ('ytSafety' in state) ? state.ytSafety : true;
   $('ytSponsored').checked = ('ytSponsored' in state) ? !!state.ytSponsored : false;
 
-  // 2026-08-26 Mandy 拍板：hashtag 排列照 EP87 線上版＝固定 5 前置＋當集居中＋#伴侶關係必修課 殿後
-  // （2026-08-21 舊制曾把它併進 ytFixedTags 第 6 位——既有 localStorage 一次性搬到殿後欄）
+  // EP95 上架定稿：固定 5 個＋#伴侶關係必修課＋當集標籤
+  // 既有 localStorage 若把課程標籤存於前置欄，搬到常駐欄，避免重複
   if ($('ytFixedTags').value.includes('#伴侶關係必修課')) {
     $('ytFixedTags').value = $('ytFixedTags').value.replace(/#伴侶關係必修課/g, '').replace(/\s+/g, ' ').trim();
     if (!$('ytTrailTags').value.trim()) $('ytTrailTags').value = DEFAULTS.ytTrailTags;
@@ -588,10 +588,10 @@
 
   /* ── 組裝 ── */
   function ytHashtags() {
-    // 排列照 EP87 線上版（2026-08-26 Mandy 拍板）：固定 5 前置 → 當集標籤 → #伴侶關係必修課 殿後
-    // 付費業配集（ytSponsored）：殿後的 #伴侶關係必修課 一併拿掉（Mandy 2026-10-02）
+    // EP95 上架定稿：固定 5 前置 → #伴侶關係必修課 → 當集標籤
+    // 付費業配集（ytSponsored）：#伴侶關係必修課 一併拿掉（Mandy 2026-10-02）
     const trail = $('ytSponsored').checked ? '' : $('ytTrailTags').value.trim();
-    return [$('ytFixedTags').value.trim(), $('ytEpTags').value.trim(), trail].filter(Boolean).join(' ');
+    return [$('ytFixedTags').value.trim(), trail, $('ytEpTags').value.trim()].filter(Boolean).join(' ');
   }
   function ytFull() {
     // 依頻道實際版型（EP81/EP82）：置頂 CTA → 章節（無標題行）→ prose → hashtag → ⚠️ → 置底 footer
@@ -606,8 +606,8 @@
     const blocks = [
       sponsored ? '' : $('ytTopCta').value.trim(),
       $('ytSafety').checked ? $('ytSafetyText').value.trim() : '',
+      prose,   // Mandy 定稿：不加「▍影片簡介」標頭
       $('ytChapters').value.trim(),
-      prose,   // 2026-10-15 Mandy：不加「▍影片簡介」標頭
       ytHashtags(),
       contact
     ];
@@ -828,34 +828,26 @@
      你套用後自己改的內容會正常存檔，不會被重複覆蓋。
   ────────────────────────────────────────────── */
   const EPISODE_PRESET = {
-    _id: 'ep95-haomei-daughter-view-20261013a',
+    _id: 'ep95-haomei-final-description-20261016a',
     editingId: 'ep_seed_08',   // 對應晨光儀表板剪輯進度板那一支（顯示排程用）
-    _label: 'EP95 女兒的視角（Feat. 郝妹）｜標題 A＋#郝家庭 Mandy 拍板（10/13）',
+    _label: 'EP95 郝妹｜Mandy 確認的影片簡介與章節版本',
     ytTitle: 'EP95 孩子是從什麼時候開始，不怕跟爸媽說話的？從女兒的視角，看父母改變後留下的影響 Feat.郝妹',
-    ytProse: `上一集郝哥講的是當爸爸的那一端，
-這一集我想換個位置，聽聽女兒怎麼說。
-郝妹今年23歲，跟爸爸一起經營「郝家庭」，
-鏡頭前很自在，她的影片我有時候是笑著看完的。
-但她其實不是一直都這樣。
-國中那幾年，她連自己的想法都很少說，
-覺得反正講了，爸媽也不會聽。
-我很好奇，一個孩子是從哪個時間點開始，
-覺得跟爸媽說話「不用怕」的。
-她給的答案，比我想的還要小。
-大人做的改變，孩子不一定當下就感覺得到，
-很多是過了好幾年，才在她身上慢慢長出來～`,
-    // 章節依《郝妹訪談_4K30_YouTube.srt》（31:38）全文，切在 Jackal 開口問該題的那一秒
+    ytProse: `上一集郝哥講的是當爸爸的那一端，這一集我想換個位置聽聽女兒怎麼說。
+
+郝妹今年23歲，跟爸爸一起經營「郝家庭」，鏡頭前很自在，父女之間的互動常常讓阿叔我微微笑著看完。但他們的關係其實不是從小就這樣。國中那幾年，她連自己的想法都很少說，覺得反正講了爸媽也不會聽。
+
+我很好奇，一個孩子是從哪個時間點開始，覺得跟爸媽說話「不用怕」的。她給的答案比我想的還要小。大人做的改變，孩子不一定當下就感覺得到，很多是過了好幾年，才在她身上慢慢呈現出來～`,
+    // 以 Mandy 確認的 EP95 上架說明為準；時間碼依定稿，不沿用舊 SRT 草稿
     ytChapters: `00:00 影片開始
-02:10 有一個「智慧開到滿」的爸爸
-04:33 爸爸給我最深的一個信念
-08:50 從什麼時候開始不怕爸爸
-11:10 第一次自己做選擇
-14:03 要不要讓孩子去撞牆
-15:23 每週一個小勝利
-19:29 不是每個人都在 0 到 100
-24:34 郝家庭是怎麼錄出來的
-29:07 我自己的創作卡關`,
-    // #郝家庭 Mandy 10/13 拍板保留
+02:14 有一個「智慧開到滿」的爸爸
+05:10 爸爸給我最深的一個信念
+07:13 拿起麥克風的那一天
+09:08 從什麼時候開始不怕爸爸
+11:10 那幾年，連意見都不太說
+12:33 第一次自己做選擇
+14:14 要不要讓孩子去撞牆
+15:32 每週一個小勝利
+19:46 不是每個人都在 0 到 100`,
     ytEpTags: '#郝妹 #郝家庭 #親子溝通',
     ytEpSearchTags: '郝妹, 郝哥, 郝旭烈, 郝家庭, 親子溝通, 親子關係, 父女, 鼓勵, 教養, 管教, 陪伴, 小勝利, 自媒體, 親密關係, 伴侶關係',
     pcTitle: 'EP95 孩子是從什麼時候開始，不怕跟爸媽說話的？從女兒的視角，看父母改變後留下的影響 Feat.郝妹',
@@ -919,7 +911,7 @@
      ⚠️ 部署腳本會把下方兩個 NL 預填標記之間整塊換成 null——
      當週全文只留在本機版，公開網頁版不帶（公版與清單照常上線）。
   ────────────────────────────────────────────── */
-  const NEWSLETTER_PRESET = null; // 網頁版不帶當週電子報全文（部署腳本自動清空）
+  const NEWSLETTER_PRESET = null; // 網頁版不帶當週電子報全文
 
   const nlPresetId = () => (NEWSLETTER_PRESET && NEWSLETTER_PRESET._id) ? NEWSLETTER_PRESET._id : 'no-preset';
 
