@@ -68,12 +68,12 @@
   label:first-of-type { margin-top: 0; }
   label .cnt { float: right; font-family: 'Patrick Hand', cursive; }
   label .cnt.over { color: #B0655A; font-weight: bold; }
-  input[type=text], textarea {
+  input[type=text], textarea, select {
     width: 100%; border: 1px solid var(--border); border-radius: 8px;
     background: var(--ivory); padding: 10px 12px; font-family: inherit;
     font-size: 14px; color: var(--text); line-height: 1.7; resize: vertical;
   }
-  input[type=text]:focus, textarea:focus { outline: 2px solid var(--rose); border-color: transparent; background: #fff; }
+  input[type=text]:focus, textarea:focus, select:focus { outline: 2px solid var(--rose); border-color: transparent; background: #fff; }
   textarea.tall { min-height: 150px; }
   textarea.mid { min-height: 90px; }
 
@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-22 11:46 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-10-29 17:08 網頁版</span></p>
   <div id="editingBar" style="display:none;margin:-4px 0 14px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;font-size:13px;line-height:1.7"></div>
 
   <div class="toolbar">
@@ -222,6 +222,8 @@
             <input type="checkbox" id="ytSponsored">
             <label for="ytSponsored" style="margin:0; font-size:14px; color:var(--text);">這集是付費業配（自家課程全部不露出：置頂 CTA、footer 課程段、#伴侶關係必修課、置頂留言課程段、Firstory 課名標籤自動拿掉——Jackal／Mandy 2026-10-02）</label>
           </div>
+          <label for="promoCourse">這集導哪一堂課（換掉 footer 課程段、置頂留言 ❶、常駐 hashtag、Firstory 課名標籤；公版不用改）</label>
+          <select id="promoCourse"></select>
           <button class="ghost" id="btnClearYt">🧹 清空本集內容（公版不動）</button>
         </div>
 
@@ -525,6 +527,27 @@
     nlSignature: 'peace~'
   };
   const EPISODE_FIELDS = ['ytTitle', 'ytProse', 'ytChapters', 'ytEpTags', 'ytEpSearchTags', 'pcTitle', 'pcProse', 'pcEpTags', 'pinEpLine'];
+  // 2026-10-29 Mandy：每集導的課可以不同（EP97 導《自我蛻變力》）→ 用「這集導哪一堂課」切換。
+  // 公版文字維持伴侶關係必修課；組裝時把公版裡的課程段換成選到的課。新增課程＝在這裡加一筆。
+  // footer：「❯ 《…》」標題行 → 副標行 → kaik.io 連結；置頂：「❶ …」到 kaik.io 連結那行；tag：不含 #
+  const PROMO_COURSES = {
+    partner: {
+      label: '伴侶關係必修課（公版預設）',
+      footer: null, pin: null, tag: '伴侶關係必修課'   // null＝照公版文字
+    },
+    transform: {
+      label: '自我蛻變力（實體工作坊）',
+      footer: '❯ 《自我蛻變力》實體工作坊\n——從一個改變自我目標出發，練出能持續運用的自我教練能力\nhttps://lifediscoverybs.kaik.io/categories/classesinperson',
+      // ⚠️ 場次日期過了要更新（2026-10-29 課程頁：11/21–22 高雄班、12/19–20 台北班）
+      pin: '❶ 實體工作坊｜《自我蛻變力》\n　從一個改變自我目標出發，練出能持續運用的自我教練能力。\n　11/21–22 高雄班｜12/19–20 台北班\n　https://lifediscoverybs.kaik.io/categories/classesinperson',
+      tag: '自我蛻變力'
+    }
+  };
+  const PROMO_DEFAULT = 'partner';
+  // 公版裡的自家課程段（業配集拿掉、換課時替換都用這兩個）
+  const FOOTER_COURSE_RE = /❯ 《[^\n]*》[^\n]*\n[^\n]*\nhttps:\/\/lifediscoverybs\.kaik\.io\/[^\n]*/;
+  const PIN_COURSE_RE = /❶ [^\n]*\n(?:[^\n]*\n)*?[^\n]*lifediscoverybs\.kaik\.io[^\n]*/;
+  function promo() { return PROMO_COURSES[$('promoCourse').value] || PROMO_COURSES[PROMO_DEFAULT]; }
   const NL_FIELDS = ['nlTitle', 'nlNotion', 'nlProse'];
   const PUBBAN_FIELDS = Object.keys(DEFAULTS);
   const ALL_FIELDS = [...EPISODE_FIELDS, ...NL_FIELDS, ...PUBBAN_FIELDS];
@@ -539,6 +562,12 @@
   });
   $('ytSafety').checked = ('ytSafety' in state) ? state.ytSafety : true;
   $('ytSponsored').checked = ('ytSponsored' in state) ? !!state.ytSponsored : false;
+  Object.keys(PROMO_COURSES).forEach(k => {
+    const o = document.createElement('option');
+    o.value = k; o.textContent = PROMO_COURSES[k].label;
+    $('promoCourse').appendChild(o);
+  });
+  $('promoCourse').value = (state.promoCourse in PROMO_COURSES) ? state.promoCourse : PROMO_DEFAULT;
 
   // EP95 上架定稿：固定 5 個＋#伴侶關係必修課＋當集標籤
   // 既有 localStorage 若把課程標籤存於前置欄，搬到常駐欄，避免重複
@@ -573,6 +602,7 @@
       ALL_FIELDS.forEach(id => s[id] = $(id).value);
       s.ytSafety = $('ytSafety').checked;
       s.ytSponsored = $('ytSponsored').checked;
+      s.promoCourse = $('promoCourse').value;
       const h = $('saveHint');
       try {
         localStorage.setItem(KEY, JSON.stringify(s));
@@ -590,7 +620,9 @@
   function ytHashtags() {
     // EP95 上架定稿：固定 5 前置 → #伴侶關係必修課 → 當集標籤
     // 付費業配集（ytSponsored）：#伴侶關係必修課 一併拿掉（Mandy 2026-10-02）
-    const trail = $('ytSponsored').checked ? '' : $('ytTrailTags').value.trim();
+    // 換課（promoCourse）：常駐欄裡的 #伴侶關係必修課 換成該課的標籤
+    const trail = $('ytSponsored').checked ? ''
+      : $('ytTrailTags').value.trim().replace('#' + PROMO_COURSES[PROMO_DEFAULT].tag, '#' + promo().tag);
     return [$('ytFixedTags').value.trim(), trail, $('ytEpTags').value.trim()].filter(Boolean).join(' ');
   }
   function ytFull() {
@@ -601,7 +633,10 @@
     let contact = $('ytContact').value.trim();
     if (sponsored) {
       // 拿掉 footer 裡的自家課程段（❯ 課程標題行 → 副標行 → kaik.io 連結 → 空行），其餘公版照舊
-      contact = contact.replace(/❯ 《[^\n]*》\n[^\n]*\nhttps:\/\/lifediscoverybs\.kaik\.io\/[^\n]*\n\n?/g, '').trim();
+      contact = contact.replace(new RegExp(FOOTER_COURSE_RE.source + '\\n\\n?', 'g'), '').trim();
+    } else if (promo().footer) {
+      // 換課：公版課程段換成這集導的課
+      contact = contact.replace(FOOTER_COURSE_RE, promo().footer);
     }
     const blocks = [
       sponsored ? '' : $('ytTopCta').value.trim(),
@@ -628,6 +663,9 @@
     if ($('ytSponsored').checked) {
       // 付費業配集：拿掉公版第 ❶ 段自家課程（標題行→說明行→kaik.io 連結→空行），剩下的 ❷ 改編號為 ❶（Mandy 2026-10-02）
       pin = pin.replace(/❶ 完整課程[^\n]*\n[^\n]*\n[^\n]*lifediscoverybs\.kaik\.io[^\n]*\n\n?/, '').replace(/^❷ /m, '❶ ').trim();
+    } else if (promo().pin) {
+      // 換課：置頂 ❶ 課程段換成這集導的課
+      pin = pin.replace(PIN_COURSE_RE, promo().pin);
     }
     return [$('pinEpLine').value.trim(), pin].filter(Boolean).join('\n\n');
   }
@@ -637,7 +675,10 @@
       .split(/[,，]/).map(t => t.trim().replace(/^#/, '')).filter(Boolean)
       .filter((t, i, a) => a.indexOf(t) === i);   // 去重（EP94：固定標籤與當集標籤重複「親密關係」）
     // 付費業配集（ytSponsored）：自家課名標籤一併拿掉（Mandy 2026-10-02）
-    return (($('ytSponsored').checked) ? tags.filter(t => t !== '伴侶關係必修課') : tags).join(',');
+    if ($('ytSponsored').checked) return tags.filter(t => t !== '伴侶關係必修課').join(',');
+    // 換課：課名標籤換成這集導的課（去重）
+    return tags.map(t => t === PROMO_COURSES[PROMO_DEFAULT].tag ? promo().tag : t)
+      .filter((t, i, a) => a.indexOf(t) === i).join(',');
   }
   function nlFull() {
     // 電子報 Systeme 貼上版：開場問候 → 內文 → 結尾署名（好消息報報走 Systeme 獨立區塊）
@@ -680,6 +721,7 @@
   ALL_FIELDS.forEach(id => $(id).addEventListener('input', () => { save(); render(); }));
   $('ytSafety').addEventListener('change', () => { save(); render(); });
   $('ytSponsored').addEventListener('change', () => { save(); render(); });
+  $('promoCourse').addEventListener('change', () => { save(); render(); });
 
   /* ── 複製 ── */
   const COPY_SOURCES = {
@@ -771,6 +813,7 @@
     ALL_FIELDS.forEach(id => payload.data[id] = $(id).value);
     payload.data.ytSafety = $('ytSafety').checked;
     payload.data.ytSponsored = $('ytSponsored').checked;
+    payload.data.promoCourse = $('promoCourse').value;
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -798,6 +841,7 @@
       hit.forEach(id => $(id).value = data[id]);
       if ('ytSafety' in data) $('ytSafety').checked = !!data.ytSafety;
       if ('ytSponsored' in data) $('ytSponsored').checked = !!data.ytSponsored;
+      if (data.promoCourse in PROMO_COURSES) $('promoCourse').value = data.promoCourse;
       save(); render();
       alert(`匯入完成：已還原 ${hit.length} 個欄位。`);
       e.target.value = '';
@@ -825,69 +869,65 @@
      本集預填（Claude 每集更新這一塊）
      規則：_id 換了才會自動套用一次；套用前把上一集的當集內容備份進
      localStorage（KEY:backup:<舊id>）。公版欄位一律不動。
+     這集導的課不是伴侶關係必修課時，帶 promoCourse（PROMO_COURSES 的 key），沒帶＝公版預設。
      你套用後自己改的內容會正常存檔，不會被重複覆蓋。
   ────────────────────────────────────────────── */
   const EPISODE_PRESET = {
-    _id: 'ep96-wensen-jk-final-20261022b',
-    editingId: 'ep_seed_09',   // 對應晨光儀表板剪輯進度板那一支（顯示排程用）
-    _label: 'EP96 文森說書｜JK 定稿標題與簡介',
-    // 標題、簡介皆為 JK 定稿原文，逐字照貼；標題前綴集數依頻道慣例
-    ytTitle: 'EP96 怎麼把喜歡的事，做成自己也喜歡的生活？當興趣變成工作，除了成果與收入，還有哪些代價要算進去？從文森的創作經驗，想清楚你真正要保留的是什麼。ft. 文森說書',
-    ytProse: `這一集，是我鼓起勇氣才敢發出邀請的對談。
+    _id: 'ep97-five-calm-habits-20261029a',
+    editingId: 'ep_seed_10',   // 對應晨光儀表板剪輯進度板那一支（顯示排程用）
+    _label: 'EP97 五個平靜習慣｜AI 初版（標題暫定首選 #18，待定稿）',
+    // 本集導《自我蛻變力》實體工作坊（Mandy 2026-10-29）；prose 照推課集慣例不放課程
+    ytTitle: 'EP97 工作沒變少，為什麼到了中年反而活得比較平靜？身體跟大腦都在變，生活方式也該替現在的自己重新設計',
+    ytProse: `湘芸前陣子跟我說，我最近看起來平靜很多。
+工作明明一樣滿，我才回頭想到，
+以前走在路上、跟夥伴視訊開會的時候，我的臉其實一直繃著，有時候還皺著眉，自己完全沒發現。
 
-文森說書的文森，從工程師一路走到全職做創作。
-外面看起來走得很順，
-但他自己說，剛辭職那一年，收入不到過去的一半，
-每天都在問自己「這樣做對嗎」。
-我很好奇，一個讀了這麼多書的人，
-在那段時間，是靠什麼撐過來的。
+狀態一不好，卡住的不只是工作。
 
-他給的答案，不是哪一本書，
-是幾件聽起來很普通的小事。
-還有一個他到現在都還沒有答案的問題：
-對自己要求這麼高，到底是追求好作品，還是對自己沒信心？
+到了中年，身體跟大腦都在變，
+如果還照以前的節奏去撐，只會越撐越累。
+真正讓我鬆下來的，不是事情變少——是我開始替「現在的自己」重新安排生活。
 
-這一集不會給你一個方法，
-但如果你也在一個「不確定這樣做對不對」的階段，
-至少會知道，有人也是這樣走過來的～
+今年試了很多方法，最後留下來的有五個，
+有幾個其實不太需要花力氣。
+每個人身體狀況不同，照自己的步調來就好～`,
+    // 依 ~/Downloads/中年五習慣.srt（25:09）；若成片再剪要重對。1.～5. 為歸納編號，字卡有編號以字卡為準
+    ytChapters: `章節
+00:00 影片開始
+02:12 為什麼到了中年會特別在意
+03:45 1. 切換環境
+05:19 2. 刻意無聊
+10:36 3. 關注身體的訊號
+14:32 4. 重新開始運動
+19:48 運動的心態
+22:01 5. 看待自己的標準`,
+    ytEpTags: '#中年 #刻意無聊 #自我照顧',
+    ytEpSearchTags: '中年, 平靜, 放鬆, 刻意無聊, 預設模式, 生活習慣, 自我照顧, 運動習慣, 健身, 飲食, 戒酒, 戒菸, 三溫暖, 工作壓力, 工作效率, 自我蛻變力, 湘芸',
+    pcTitle: 'EP97 工作沒變少，為什麼到了中年反而活得比較平靜？身體跟大腦都在變，生活方式也該替現在的自己重新設計',
+    pcProse: `湘芸前陣子跟我說，我最近看起來平靜很多。
+工作明明一樣滿，我才回頭想到，
+以前走在路上、跟夥伴視訊開會的時候，我的臉其實一直繃著，有時候還皺著眉，自己完全沒發現。
 
-最後文森分享的這段話我覺得很有意思，因為乍聽之下會覺得不合理
+狀態一不好，卡住的不只是工作。
 
-但當文森解釋完，你會覺得這段話原來在談的，是對人性如此深刻的觀察。
+到了中年，身體跟大腦都在變，
+如果還照以前的節奏去撐，只會越撐越累。
+真正讓我鬆下來的，不是事情變少——是我開始替「現在的自己」重新安排生活。
 
-文森：所有簡單的事情都不正確，但所有不簡單的事情都沒有價值。`,
-    // JK 定稿未附章節；之後補進來不必升 _id（空欄會自動回補）
-    ytChapters: '',
-    ytEpTags: '#文森說書 #文森 #自我懷疑 #創作者',
-    ytEpSearchTags: '文森說書, 文森, 自我懷疑, 創作者, 興趣變工作, 全職創作, 工程師, 離職, 自媒體, 說書, 讀書, 完美主義, 自信, 人生選擇, 伴侶關係',
-    pcTitle: 'EP96 怎麼把喜歡的事，做成自己也喜歡的生活？當興趣變成工作，除了成果與收入，還有哪些代價要算進去？從文森的創作經驗，想清楚你真正要保留的是什麼。ft. 文森說書',
-    pcProse: `這一集，是我鼓起勇氣才敢發出邀請的對談。
+今年試了很多方法，最後留下來的有五個，
+有幾個其實不太需要花力氣。
+每個人身體狀況不同，照自己的步調來就好～`,
+    pcEpTags: '中年,刻意無聊,自我照顧',
+    pinEpLine: '你最近有沒有一個讓自己鬆下來的小習慣？留言跟我們分享～',
+    // 三溫暖冷熱交替＋運動有健康風險；戒酒戒菸只帶過，警語兩行可刪
+    ytSafety: true,
+    ytSafetyText: `▍內容說明
+本集分享的是個人生活經驗，不是醫療建議。三溫暖冷熱交替、運動強度與飲食調整，都請依自己的身體狀況進行；有心血管疾病、高血壓或其他慢性病，開始前請先諮詢醫師。
 
-文森說書的文森，從工程師一路走到全職做創作。
-外面看起來走得很順，
-但他自己說，剛辭職那一年，收入不到過去的一半，
-每天都在問自己「這樣做對嗎」。
-我很好奇，一個讀了這麼多書的人，
-在那段時間，是靠什麼撐過來的。
-
-他給的答案，不是哪一本書，
-是幾件聽起來很普通的小事。
-還有一個他到現在都還沒有答案的問題：
-對自己要求這麼高，到底是追求好作品，還是對自己沒信心？
-
-這一集不會給你一個方法，
-但如果你也在一個「不確定這樣做對不對」的階段，
-至少會知道，有人也是這樣走過來的～
-
-最後文森分享的這段話我覺得很有意思，因為乍聽之下會覺得不合理
-
-但當文森解釋完，你會覺得這段話原來在談的，是對人性如此深刻的觀察。
-
-文森：所有簡單的事情都不正確，但所有不簡單的事情都沒有價值。`,
-    pcEpTags: '文森說書,文森,自我懷疑,創作者',
-    pinEpLine: '',
-    // 創作與自我懷疑主題，無暴力／控制情境，不掛安全提醒
-    ytSafety: false
+未滿 18 歲禁止飲酒　·　酒後不開車
+吸菸有害健康　·　戒菸專線 0800-63-63-63`,
+    // 導購課程：footer 課程段、置頂 ❶、常駐 hashtag、Firstory 課名標籤都換成《自我蛻變力》
+    promoCourse: 'transform'
   };
   window.EDITING_ID = (EPISODE_PRESET && EPISODE_PRESET.editingId) || '';   // 給下方剪輯連動用
 
@@ -917,6 +957,8 @@
     EPISODE_FIELDS.forEach(id => { if (id in EPISODE_PRESET) $(id).value = EPISODE_PRESET[id]; });
     if ('ytSafety' in EPISODE_PRESET) $('ytSafety').checked = !!EPISODE_PRESET.ytSafety;
     $('ytSponsored').checked = !!EPISODE_PRESET.ytSponsored;   // 沒帶＝非業配集，自動取消勾選
+    // 導購課程逐集切換：沒帶＝回到公版預設（伴侶關係必修課）
+    $('promoCourse').value = (EPISODE_PRESET.promoCourse in PROMO_COURSES) ? EPISODE_PRESET.promoCourse : PROMO_DEFAULT;
     // 安全提醒文字＝逐集可覆寫：preset 有帶就用本集專用，沒帶就還原公版 DEFAULTS
     $('ytSafetyText').value = ('ytSafetyText' in EPISODE_PRESET) ? EPISODE_PRESET.ytSafetyText : DEFAULTS.ytSafetyText;
     save();
