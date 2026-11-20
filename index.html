@@ -171,7 +171,7 @@
     <h1>上架工作台<span class="en">Publish Bench</span></h1>
     <span class="save-hint" id="saveHint">已自動儲存 ✓</span>
   </header>
-  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-11-20 14:30 網頁版</span></p>
+  <p class="subtitle">當集內容貼進來 → 公版自動接上 → 一鍵複製。上片與電子報同一站；公版改一次，永久記住（存在這台電腦的瀏覽器裡）。<span id="buildTag" style="opacity:.55">｜版本：2026-11-20 14:32 網頁版</span></p>
   <div id="editingBar" style="display:none;margin:-4px 0 14px;padding:10px 14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;font-size:13px;line-height:1.7"></div>
 
   <div class="toolbar">
@@ -541,6 +541,11 @@
       // ⚠️ 場次日期過了要更新（2026-10-29 課程頁：11/21–22 高雄班、12/19–20 台北班）
       pin: '❶ 實體工作坊｜《自我蛻變力》\n　從一個改變自我目標出發，練出能持續運用的自我教練能力。\n　11/21–22 高雄班｜12/19–20 台北班\n　https://lifediscoverybs.kaik.io/categories/classesinperson',
       tag: '自我蛻變力'
+    },
+    // 2026-11-20 EP100 Mandy「兩個都放」：保留公版伴侶關係必修課，再接上《自我蛻變力》（append＝不換、往後加）
+    both: {
+      label: '兩堂都放（伴侶關係必修課＋自我蛻變力）',
+      append: 'transform', footer: null, pin: null, tag: '伴侶關係必修課'
     }
   };
   const PROMO_DEFAULT = 'partner';
@@ -622,7 +627,8 @@
     // 付費業配集（ytSponsored）：#伴侶關係必修課 一併拿掉（Mandy 2026-10-02）
     // 換課（promoCourse）：常駐欄裡的 #伴侶關係必修課 換成該課的標籤
     const trail = $('ytSponsored').checked ? ''
-      : $('ytTrailTags').value.trim().replace('#' + PROMO_COURSES[PROMO_DEFAULT].tag, '#' + promo().tag);
+      : $('ytTrailTags').value.trim().replace('#' + PROMO_COURSES[PROMO_DEFAULT].tag,
+          '#' + promo().tag + (promo().append ? ' #' + PROMO_COURSES[promo().append].tag : ''));
     return [$('ytFixedTags').value.trim(), trail, $('ytEpTags').value.trim()].filter(Boolean).join(' ');
   }
   function ytFull() {
@@ -634,6 +640,9 @@
     if (sponsored) {
       // 拿掉 footer 裡的自家課程段（❯ 課程標題行 → 副標行 → kaik.io 連結 → 空行），其餘公版照舊
       contact = contact.replace(new RegExp(FOOTER_COURSE_RE.source + '\\n\\n?', 'g'), '').trim();
+    } else if (promo().append) {
+      // 兩堂都放：公版課程段保留，後面接上另一堂
+      contact = contact.replace(FOOTER_COURSE_RE, m => m + '\n\n' + PROMO_COURSES[promo().append].footer);
     } else if (promo().footer) {
       // 換課：公版課程段換成這集導的課
       contact = contact.replace(FOOTER_COURSE_RE, promo().footer);
@@ -663,6 +672,10 @@
     if ($('ytSponsored').checked) {
       // 付費業配集：拿掉公版第 ❶ 段自家課程（標題行→說明行→kaik.io 連結→空行），剩下的 ❷ 改編號為 ❶（Mandy 2026-10-02）
       pin = pin.replace(/❶ 完整課程[^\n]*\n[^\n]*\n[^\n]*lifediscoverybs\.kaik\.io[^\n]*\n\n?/, '').replace(/^❷ /m, '❶ ').trim();
+    } else if (promo().append) {
+      // 兩堂都放：公版 ❶ 保留，另一堂當 ❷ 插在後面，原本 ❷ 電子報改 ❸
+      pin = pin.replace(/^❷ /m, '❸ ')
+        .replace(PIN_COURSE_RE, m => m + '\n\n' + PROMO_COURSES[promo().append].pin.replace(/^❶ /, '❷ '));
     } else if (promo().pin) {
       // 換課：置頂 ❶ 課程段換成這集導的課
       pin = pin.replace(PIN_COURSE_RE, promo().pin);
@@ -677,6 +690,7 @@
     // 付費業配集（ytSponsored）：自家課名標籤一併拿掉（Mandy 2026-10-02）
     if ($('ytSponsored').checked) return tags.filter(t => t !== '伴侶關係必修課').join(',');
     // 換課：課名標籤換成這集導的課（去重）
+    if (promo().append) tags.push(PROMO_COURSES[promo().append].tag);
     return tags.map(t => t === PROMO_COURSES[PROMO_DEFAULT].tag ? promo().tag : t)
       .filter((t, i, a) => a.indexOf(t) === i).join(',');
   }
@@ -873,10 +887,11 @@
      你套用後自己改的內容會正常存檔，不會被重複覆蓋。
   ────────────────────────────────────────────── */
   const EPISODE_PRESET = {
-    _id: 'ep100-xiao-aici-good-goodbye-20261120',
+    _id: 'ep100-xiao-aici-good-goodbye-20261120b',
+    promoCourse: 'both',   // Mandy 2026-11-20：伴侶關係必修課＋自我蛻變力兩堂都放
     editingId: 'ep_1794388518201',   // 對應晨光儀表板剪輯進度板那一支（顯示排程用）
     _label: 'EP100 蕭愛慈（JK 乾媽）・好好說再見｜Jackal 定稿標題與簡介（2026-11-20）',
-    // 標題、簡介皆為 Mandy 轉貼定稿逐字照貼；非業配集，導購走公版預設（伴侶關係必修課）；章節未提供先留空
+    // 標題、簡介皆為 Mandy 轉貼定稿逐字照貼；非業配集，導購兩堂都放（promoCourse: both）；章節未提供先留空
     ytTitle: 'EP100 如何在活著的時候，好好說再見？母親沒交代清楚的那一次急救，讓 69 歲的乾媽決定給孩子上最後一課 feat. 蕭愛慈',
     ytProse: `▍內容說明
 本集談到親人離世、急救與插管的經過，以及來賓個人對醫療與身後事的選擇。內容為個人經驗分享，不是醫療或法律建議。
